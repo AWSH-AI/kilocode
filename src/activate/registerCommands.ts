@@ -226,7 +226,7 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 	}, // kilocode_change begin
 	focusChatInput: async () => {
 		try {
-			await vscode.commands.executeCommand("kilo-code.SidebarProvider.focus")
+			await vscode.commands.executeCommand("awsh-code.SidebarProvider.focus")
 			await delay(100)
 
 			let visibleProvider = getVisibleProviderOrLog(outputChannel)
@@ -257,7 +257,7 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 		})
 	},
 	// kilocode_change end
-	
+
 	// Recovery commands for webview issues
 	recoverWebview: async () => {
 		try {
@@ -269,15 +269,15 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 			outputChannel.appendLine(`Error in recoverWebview: ${error}`)
 		}
 	},
-	
+
 	restartExtension: async () => {
 		try {
-			await vscode.commands.executeCommand('workbench.action.reloadWindow')
+			await vscode.commands.executeCommand("workbench.action.reloadWindow")
 		} catch (error) {
 			outputChannel.appendLine(`Error in restartExtension: ${error}`)
 		}
 	},
-	
+
 	// kilocode_change end
 })
 
