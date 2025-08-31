@@ -136,6 +136,7 @@ export interface ExtensionMessage {
 		| "usageDataResponse" // kilocode_change
 		| "commands"
 		| "insertTextIntoTextarea"
+		| "memoryWarning"
 	text?: string
 	payload?: ProfileDataResponsePayload | BalanceDataResponsePayload // kilocode_change: Add payload for profile and balance data
 	action?:
@@ -151,6 +152,7 @@ export interface ExtensionMessage {
 		| "focusInput"
 		| "switchTab"
 		| "focusChatInput" // kilocode_change
+		| "clearCaches"
 	invoke?: "newChat" | "sendMessage" | "primaryButtonClick" | "secondaryButtonClick" | "setChatBoxMessage"
 	state?: ExtensionState
 	images?: string[]

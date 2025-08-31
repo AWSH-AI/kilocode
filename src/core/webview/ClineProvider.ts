@@ -131,10 +131,10 @@ export class ClineProvider
 	private recentTasksCache?: string[]
 
 	// Webview state management for service worker error recovery
-	private webviewState: 'loading' | 'ready' | 'error' | 'disposed' = 'loading'
+	private webviewState: "loading" | "ready" | "error" | "disposed" = "loading"
 	private webviewErrorCount = 0
 	private readonly MAX_WEBVIEW_ERRORS = 3
-	private memoryMonitor: NodeJS.Timer | null = null
+	private memoryMonitor: NodeJS.Timeout | null = null
 	private readonly MEMORY_CHECK_INTERVAL = 30000 // 30 seconds
 	private readonly MEMORY_THRESHOLD = 500 * 1024 * 1024 // 500MB
 
@@ -1102,19 +1102,19 @@ export class ClineProvider
 	private setWebviewMessageListener(webview: vscode.Webview) {
 		// Start webview state monitoring
 		this.monitorWebviewState(webview)
-		
+
 		// Start memory monitoring
 		this.startMemoryMonitoring()
 
 		const onReceiveMessage = async (message: WebviewMessage) => {
 			// Handle webview state messages
-			if (message.type === 'webviewReady') {
-				this.webviewState = 'ready'
+			if (message.type === "webviewReady") {
+				this.webviewState = "ready"
 				this.webviewErrorCount = 0
-			} else if (message.type === 'webviewError') {
+			} else if (message.type === "webviewError") {
 				await this.handleWebviewError(new Error(message.error))
 			}
-			
+
 			// Handle regular messages
 			return webviewMessageHandler(this, message, this.marketplaceManager)
 		}
@@ -2822,14 +2822,14 @@ Here is the project's README to help you get started:\n\n${mcpDetails.readmeCont
 	 * Monitors webview state and handles errors
 	 */
 	private monitorWebviewState(webview: vscode.Webview): void {
-		this.webviewState = 'loading'
-		
+		this.webviewState = "loading"
+
 		// Monitor webview state changes
 		const stateChangeDisposable = webview.onDidReceiveMessage((message) => {
-			if (message.type === 'webviewReady') {
-				this.webviewState = 'ready'
+			if (message.type === "webviewReady") {
+				this.webviewState = "ready"
 				this.webviewErrorCount = 0
-			} else if (message.type === 'webviewError') {
+			} else if (message.type === "webviewError") {
 				this.handleWebviewError(new Error(message.error))
 			}
 		})
@@ -2842,11 +2842,11 @@ Here is the project's README to help you get started:\n\n${mcpDetails.readmeCont
 	 */
 	private async handleWebviewError(error: Error): Promise<void> {
 		this.log(`Webview error: ${error.message}`)
-		this.webviewState = 'error'
+		this.webviewState = "error"
 		this.webviewErrorCount++
-		
+
 		if (this.webviewErrorCount >= this.MAX_WEBVIEW_ERRORS) {
-			await this.notifyUser('Multiple webview errors detected. Attempting recovery...', 'warning')
+			await this.notifyUser("Multiple webview errors detected. Attempting recovery...", "warning")
 			await this.recoverWebview()
 			this.webviewErrorCount = 0
 		}
@@ -2857,36 +2857,36 @@ Here is the project's README to help you get started:\n\n${mcpDetails.readmeCont
 	 */
 	public async recoverWebview(): Promise<void> {
 		try {
-			await this.notifyUser('Attempting to recover webview...', 'info')
-			
+			await this.notifyUser("Attempting to recover webview...", "info")
+
 			// Close current webview
 			if (this.view) {
-				if ('dispose' in this.view) {
+				if ("dispose" in this.view) {
 					this.view.dispose()
 				}
 				this.view = undefined
 			}
-			
+
 			// Clear webview state
-			this.webviewState = 'disposed'
+			this.webviewState = "disposed"
 			this.webviewErrorCount = 0
-			
+
 			// Stop memory monitoring
 			this.stopMemoryMonitoring()
-			
+
 			// Recreate webview
-			if (this.renderContext === 'editor') {
+			if (this.renderContext === "editor") {
 				// For tab panels, we need to recreate the panel
-				await vscode.commands.executeCommand('kilocode.openInNewTab')
+				await vscode.commands.executeCommand("awsh-code.openInNewTab")
 			} else {
 				// For sidebar, we can try to refresh
-				await vscode.commands.executeCommand('workbench.action.webview.reloadWebviewAction')
+				await vscode.commands.executeCommand("workbench.action.webview.reloadWebviewAction")
 			}
-			
-			await this.notifyUser('Webview recovered successfully', 'info')
+
+			await this.notifyUser("Webview recovered successfully", "info")
 		} catch (error) {
 			this.log(`Failed to recover webview: ${error}`)
-			await this.notifyUser('Failed to recover webview. Please restart the extension.', 'error')
+			await this.notifyUser("Failed to recover webview. Please restart the extension.", "error")
 		}
 	}
 
@@ -2920,34 +2920,34 @@ Here is the project's README to help you get started:\n\n${mcpDetails.readmeCont
 	 * Handles high memory usage by clearing caches and notifying webview
 	 */
 	private handleHighMemoryUsage(): void {
-		this.log('High memory usage detected, clearing caches...')
-		
+		this.log("High memory usage detected, clearing caches...")
+
 		// Force garbage collection if available
 		if (global.gc) {
 			global.gc()
 		}
-		
+
 		// Notify webview to clear caches
 		this.postMessageToWebview({
-			type: 'memoryWarning',
-			action: 'clearCaches'
+			type: "memoryWarning",
+			action: "clearCaches",
 		})
 	}
 
 	/**
 	 * Notifies user with messages
 	 */
-	private async notifyUser(message: string, type: 'info' | 'warning' | 'error'): Promise<void> {
+	private async notifyUser(message: string, type: "info" | "warning" | "error"): Promise<void> {
 		const fullMessage = `Kilo Code: ${message}`
-		
+
 		switch (type) {
-			case 'info':
+			case "info":
 				await vscode.window.showInformationMessage(fullMessage)
 				break
-			case 'warning':
+			case "warning":
 				await vscode.window.showWarningMessage(fullMessage)
 				break
-			case 'error':
+			case "error":
 				await vscode.window.showErrorMessage(fullMessage)
 				break
 		}
@@ -2956,7 +2956,7 @@ Here is the project's README to help you get started:\n\n${mcpDetails.readmeCont
 	/**
 	 * Gets current webview state
 	 */
-	public getWebviewState(): 'loading' | 'ready' | 'error' | 'disposed' {
+	public getWebviewState(): "loading" | "ready" | "error" | "disposed" {
 		return this.webviewState
 	}
 
