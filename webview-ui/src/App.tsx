@@ -219,7 +219,11 @@ const App = () => {
 	// kilocode_change end
 
 	// Tell the extension that we are ready to receive messages.
-	useEffect(() => vscode.postMessage({ type: "webviewDidLaunch" }), [])
+	useEffect(() => {
+		vscode.postMessage({ type: "webviewDidLaunch" })
+		// Notify extension that webview is ready for state monitoring
+		vscode.postMessage({ type: "webviewReady" })
+	}, [])
 
 	// Initialize source map support for better error reporting
 	useEffect(() => {

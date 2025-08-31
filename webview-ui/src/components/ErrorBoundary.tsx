@@ -38,6 +38,21 @@ class ErrorBoundary extends Component<ErrorProps, ErrorState> {
 		const componentStack = errorInfo.componentStack || ""
 		const enhancedError = await enhanceErrorWithSourceMaps(error, componentStack)
 
+		// Check for service worker errors and notify extension
+		if (error.message.includes('ServiceWorker') || error.message.includes('service worker')) {
+			try {
+				// Notify extension to recover webview
+				const { vscode } = await import('./utils/vscode')
+				vscode.postMessage({
+					type: 'webviewError',
+					error: 'serviceWorkerRegistrationFailed',
+					details: error.message
+				})
+			} catch (postMessageError) {
+				console.error('Failed to notify extension of service worker error:', postMessageError)
+			}
+		}
+
 		telemetryClient.capture("error_boundary_caught_error", {
 			error: enhancedError.message,
 			stack: enhancedError.sourceMappedStack || enhancedError.stack,
