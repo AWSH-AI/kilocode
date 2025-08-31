@@ -1,35 +1,35 @@
-## Context
+# Pull Request
 
-<!-- Brief description of WHAT you’re doing and WHY. -->
+## Description
+<!-- Provide a brief description of the changes -->
 
-## Implementation
+## Related Issue
+<!-- Link to the related issue (e.g., Fixes #123) -->
 
-<!--
+## Type of Change
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Documentation update
+- [ ] Performance improvement
+- [ ] Refactoring (no functional changes)
 
-Some description of HOW you achieved it. Perhaps give a high level description of the program flow. Did you need to refactor something? What tradeoffs did you take? Are there things in here which you’d particularly like people to pay close attention to?
+## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+- [ ] No new warnings or errors
 
--->
+## Checklist
+- [ ] Code follows the project's style guidelines
+- [ ] Self-review of code completed
+- [ ] Code is commented where necessary
+- [ ] Documentation is updated if needed
+- [ ] Changes generate no new warnings
+- [ ] Added tests that prove the fix is effective or that the feature works
 
-## Screenshots
+## Screenshots (if applicable)
+<!-- Add screenshots to help explain your changes -->
 
-| before | after |
-| ------ | ----- |
-|        |       |
-
-## How to Test
-
-<!--
-
-A straightforward scenario of how to test your changes will help reviewers that are not familiar with the part of the code that you are changing but want to see it in action. This section can include a description or step-by-step instructions of how to get to the state of v2 that your change affects.
-
-A "How To Test" section can look something like this:
-
-- Sign in with a user with tracks
-- Activate `show_awesome_cat_gifs` feature (add `?feature.show_awesome_cat_gifs=1` to your URL)
-- You should see a GIF with cats dancing
-
--->
-
-## Get in Touch
-
-<!-- We'd love to have a way to chat with you about your changes if necessary. If you're in the [Kilo Code Discord](https://kilocode.ai/discord), please share your handle here. -->
+## Additional Notes
+<!-- Any additional information that reviewers should know -->
