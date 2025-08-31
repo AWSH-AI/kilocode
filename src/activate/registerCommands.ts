@@ -257,6 +257,28 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 		})
 	},
 	// kilocode_change end
+	
+	// Recovery commands for webview issues
+	recoverWebview: async () => {
+		try {
+			const visibleProvider = getVisibleProviderOrLog(outputChannel)
+			if (visibleProvider) {
+				await visibleProvider.recoverWebview()
+			}
+		} catch (error) {
+			outputChannel.appendLine(`Error in recoverWebview: ${error}`)
+		}
+	},
+	
+	restartExtension: async () => {
+		try {
+			await vscode.commands.executeCommand('workbench.action.reloadWindow')
+		} catch (error) {
+			outputChannel.appendLine(`Error in restartExtension: ${error}`)
+		}
+	},
+	
+	// kilocode_change end
 })
 
 export const openClineInNewTab = async ({ context, outputChannel }: Omit<RegisterCommandOptions, "provider">) => {
