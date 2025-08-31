@@ -328,7 +328,9 @@ export type ExtensionState = Pick<
 	| "remoteControlEnabled"
 > & {
 	version: string
-	clineMessages: ClineMessage[]
+	// Remove clineMessages and taskHistory from global state to prevent memory issues
+	// These will be loaded on-demand from disk storage instead
+	clineMessages: ClineMessage[] // Loaded on-demand, not stored in global state
 	currentTaskItem?: HistoryItem
 	currentTaskTodos?: TodoItem[] // Initial todos for the current task
 	apiConfiguration?: ProviderSettings
@@ -337,7 +339,8 @@ export type ExtensionState = Pick<
 	kilocodeDefaultModel: string
 	shouldShowAnnouncement: boolean
 
-	taskHistory: HistoryItem[]
+	// Remove taskHistory from global state - will be loaded on-demand
+	// taskHistory: HistoryItem[] // Loaded on-demand, not stored in global state
 
 	writeDelayMs: number
 	requestDelaySeconds: number
@@ -380,9 +383,14 @@ export type ExtensionState = Pick<
 	autoCondenseContext: boolean
 	autoCondenseContextPercent: number
 	marketplaceItems?: MarketplaceItem[]
-	marketplaceInstalledMetadata?: { project: Record<string, any>; global: Record<string, any> }
-	profileThresholds: Record<string, number>
-	hasOpenedModeSelector: boolean
+	marketplaceInstalledMetadata?: { project: Record<string, any>; version: string } | undefined
+	commands: Command[]
+	maxConcurrentFileReads?: number
+	allowVeryLargeReads?: boolean // kilocode_change
+	mdmCompliant?: boolean
+	hasOpenedModeSelector: boolean // New property to track if user has opened mode selector
+	alwaysAllowFollowupQuestions: boolean // New property for follow-up questions auto-approve
+	followupAutoApproveTimeoutMs: number | undefined // Timeout in ms for auto-approving follow-up questions
 }
 
 export interface ClineSayTool {
