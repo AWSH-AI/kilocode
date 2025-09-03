@@ -58,7 +58,7 @@ const TelemetryBanner = () => {
 					<Trans
 						i18nKey="welcome:telemetry.anonymousTelemetry"
 						components={{
-							privacyLink: <VSCodeLink href="https://kilocode.ai/privacy" />,
+							privacyLink: <VSCodeLink href="https://awsh.cloud/privacy" />,
 						}}
 					/>
 					<div className="mt-1">

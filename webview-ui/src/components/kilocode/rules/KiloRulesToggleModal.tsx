@@ -160,13 +160,13 @@ const KiloRulesToggleModal: React.FC = () => {
 					<div className="text-xs text-[var(--vscode-descriptionForeground)] mb-4">
 						{currentView === "rule" ? (
 							<DescriptionWithLink
-								href="https://kilocode.ai/docs/advanced-usage/custom-rules"
+								href="https://awsh.cloud/docs/advanced-usage/custom-rules"
 								linkText={t("kilocode:docs")}>
 								{t("kilocode:rules.description.rules")}
 							</DescriptionWithLink>
 						) : (
 							<DescriptionWithLink
-								href="https://kilocode.ai/docs/features/slash-commands/workflows"
+								href="https://awsh.cloud/docs/features/slash-commands/workflows"
 								linkText={t("kilocode:docs")}>
 								{t("kilocode:rules.description.workflows")}{" "}
 								<span className="text-[var(--vscode-foreground)] font-bold">/workflow-name</span>{" "}

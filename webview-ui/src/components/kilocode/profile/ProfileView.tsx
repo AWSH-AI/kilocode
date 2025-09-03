@@ -165,7 +165,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ onDone }) => {
 								<div className="w-full flex gap-2 flex-col min-[225px]:flex-row">
 									<div className="w-full min-[225px]:w-1/2">
 										<VSCodeButtonLink
-											href="https://kilocode.ai/profile"
+											href="https://awsh.cloud/profile"
 											appearance="primary"
 											className="w-full">
 											{t("kilocode:profile.dashboard")}
@@ -254,7 +254,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ onDone }) => {
 
 											<div className="text-center">
 												<VSCodeButtonLink
-													href="https://kilocode.ai/profile"
+													href="https://awsh.cloud/profile"
 													appearance="secondary"
 													className="text-sm">
 													{t("kilocode:profile.shop.viewAll")}

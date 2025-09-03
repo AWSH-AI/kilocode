@@ -1610,7 +1610,7 @@ export const webviewMessageHandler = async (
 			} else if (answer === discordText) {
 				await vscode.env.openExternal(vscode.Uri.parse("https://discord.gg/fxrhCFGhkP"))
 			} else if (answer === customerSupport) {
-				await vscode.env.openExternal(vscode.Uri.parse("https://kilocode.ai/support"))
+				await vscode.env.openExternal(vscode.Uri.parse("https://awsh.cloud/support"))
 			}
 			break
 		}
