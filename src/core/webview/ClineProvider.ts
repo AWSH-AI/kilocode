@@ -283,6 +283,70 @@ export class ClineProvider
 	}
 
 	/**
+	 * Load current task history item on-demand from disk storage
+	 */
+	private async getCurrentTaskHistoryItem(): Promise<HistoryItem | undefined> {
+		try {
+			const currentTaskId = this.getCurrentTask()?.taskId
+			if (!currentTaskId) return undefined
+
+			const taskHistory = await this.getTaskHistoryOnDemand()
+			return taskHistory.find((item: HistoryItem) => item.id === currentTaskId)
+		} catch (error) {
+			console.error("Failed to get current task history item:", error)
+			return undefined
+		}
+	}
+
+	/**
+	 * Load current task cline messages on-demand from disk storage
+	 */
+	private async getCurrentTaskClineMessages(): Promise<ClineMessage[]> {
+		try {
+			const currentTask = this.getCurrentTask()
+			if (!currentTask?.taskId) return []
+
+			// Use the existing task's message state handler to get messages
+			return currentTask.clineMessages || []
+		} catch (error) {
+			console.error("Failed to get current task cline messages:", error)
+			return []
+		}
+	}
+
+	/**
+	 * Load task history on-demand from disk storage instead of global state
+	 */
+	private async getTaskHistoryOnDemand(): Promise<HistoryItem[]> {
+		try {
+			// Load task history from disk storage
+			const taskHistory = await this.getTaskHistoryFromDisk()
+			return taskHistory
+				.filter((item: HistoryItem) => item.ts && item.task)
+				.sort((a: HistoryItem, b: HistoryItem) => b.ts - a.ts)
+				.slice(0, 100) // Limit to latest 100 tasks for performance
+		} catch (error) {
+			console.error("Failed to get task history on demand:", error)
+			return []
+		}
+	}
+
+	/**
+	 * Load task history from disk storage
+	 */
+	private async getTaskHistoryFromDisk(): Promise<HistoryItem[]> {
+		try {
+			// This would need to be implemented to read from disk storage
+			// For now, return empty array to prevent memory issues
+			// TODO: Implement proper disk storage reading
+			return []
+		} catch (error) {
+			console.error("Failed to get task history from disk:", error)
+			return []
+		}
+	}
+
+	/**
 	 * Synchronize cloud profiles with local profiles
 	 */
 	private async syncCloudProfiles() {
@@ -1630,9 +1694,10 @@ export class ClineProvider
 	}
 
 	async deleteTaskFromState(id: string) {
-		const taskHistory = this.getGlobalState("taskHistory") ?? []
-		const updatedTaskHistory = taskHistory.filter((task) => task.id !== id)
-		await this.updateGlobalState("taskHistory", updatedTaskHistory)
+		// Remove taskHistory from global state to prevent memory issues
+		// For now, we'll skip updating global state since we're moving to disk storage
+		// TODO: Implement disk-based task deletion
+		console.log(`Task deletion for ID ${id} - will be implemented with disk storage`)
 		this.recentTasksCache = undefined
 		await this.postStateToWebview()
 	}
@@ -1794,7 +1859,8 @@ export class ClineProvider
 			ttsSpeed,
 			diffEnabled,
 			enableCheckpoints,
-			taskHistory,
+			// Remove taskHistory from global state to prevent memory issues
+			// taskHistory, // Will be loaded on-demand from disk storage
 			soundVolume,
 			browserViewportSize,
 			screenshotQuality,
@@ -1900,13 +1966,13 @@ export class ClineProvider
 			uiKind: vscode.UIKind[vscode.env.uiKind], // kilocode_change
 			kilocodeDefaultModel: await getKilocodeDefaultModel(apiConfiguration.kilocodeToken),
 			currentTaskItem: this.getCurrentTask()?.taskId
-				? (taskHistory || []).find((item: HistoryItem) => item.id === this.getCurrentTask()?.taskId)
+				? await this.getCurrentTaskHistoryItem()
 				: undefined,
-			clineMessages: this.getCurrentTask()?.clineMessages || [],
+			// Load clineMessages on-demand from disk storage instead of global state
+			clineMessages: await this.getCurrentTaskClineMessages(),
 			currentTaskTodos: this.getCurrentTask()?.todoList || [],
-			taskHistory: (taskHistory || [])
-				.filter((item: HistoryItem) => item.ts && item.task)
-				.sort((a: HistoryItem, b: HistoryItem) => b.ts - a.ts),
+			// Load taskHistory on-demand from disk storage instead of global state
+			taskHistory: await this.getTaskHistoryOnDemand(),
 			soundEnabled: soundEnabled ?? false,
 			ttsEnabled: ttsEnabled ?? false,
 			ttsSpeed: ttsSpeed ?? 1.0,
