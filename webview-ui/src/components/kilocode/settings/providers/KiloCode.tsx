@@ -100,7 +100,7 @@ export const KiloCode = ({
 				models={routerModels?.["kilocode-openrouter"] ?? {}}
 				modelIdKey="kilocodeModel"
 				serviceName="Kilo Code"
-				serviceUrl="https://kilocode.ai"
+				serviceUrl="https://awsh.cloud"
 				organizationAllowList={organizationAllowList}
 			/>
 		</>

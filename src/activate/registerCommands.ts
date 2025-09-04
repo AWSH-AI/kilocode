@@ -24,7 +24,7 @@ import { generateTerminalCommand } from "../utils/terminalCommandGenerator" // k
 export function getVisibleProviderOrLog(outputChannel: vscode.OutputChannel): ClineProvider | undefined {
 	const visibleProvider = ClineProvider.getVisibleInstance()
 	if (!visibleProvider) {
-		outputChannel.appendLine("Cannot find any visible Kilo Code instances.")
+		outputChannel.appendLine("Cannot find any visible AWSH Code instances.")
 		return undefined
 	}
 	return visibleProvider
@@ -165,7 +165,7 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 		visibleProvider.postMessageToWebview({ type: "action", action: "profileButtonClicked" })
 	},
 	helpButtonClicked: () => {
-		vscode.env.openExternal(vscode.Uri.parse("https://kilocode.ai"))
+		vscode.env.openExternal(vscode.Uri.parse("https://awsh.cloud"))
 	},
 	// kilocode_change end
 	marketplaceButtonClicked: () => {
@@ -226,7 +226,7 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 	}, // kilocode_change begin
 	focusChatInput: async () => {
 		try {
-			await vscode.commands.executeCommand("kilo-code.SidebarProvider.focus")
+			await vscode.commands.executeCommand("awsh-code.SidebarProvider.focus")
 			await delay(100)
 
 			let visibleProvider = getVisibleProviderOrLog(outputChannel)
@@ -257,7 +257,7 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 		})
 	},
 	// kilocode_change end
-	
+
 	// Recovery commands for webview issues
 	recoverWebview: async () => {
 		try {
@@ -269,15 +269,15 @@ const getCommandsMap = ({ context, outputChannel }: RegisterCommandOptions): Rec
 			outputChannel.appendLine(`Error in recoverWebview: ${error}`)
 		}
 	},
-	
+
 	restartExtension: async () => {
 		try {
-			await vscode.commands.executeCommand('workbench.action.reloadWindow')
+			await vscode.commands.executeCommand("workbench.action.reloadWindow")
 		} catch (error) {
 			outputChannel.appendLine(`Error in restartExtension: ${error}`)
 		}
 	},
-	
+
 	// kilocode_change end
 })
 
@@ -311,7 +311,7 @@ export const openClineInNewTab = async ({ context, outputChannel }: Omit<Registe
 
 	const targetCol = hasVisibleEditors ? Math.max(lastCol + 1, 1) : vscode.ViewColumn.Two
 
-	const newPanel = vscode.window.createWebviewPanel(ClineProvider.tabPanelId, "Kilo Code", targetCol, {
+	const newPanel = vscode.window.createWebviewPanel(ClineProvider.tabPanelId, "AWSH Code", targetCol, {
 		enableScripts: true,
 		retainContextWhenHidden: true,
 		localResourceRoots: [context.extensionUri],

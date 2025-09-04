@@ -51,7 +51,7 @@ export const About = ({ telemetrySetting, setTelemetrySetting, className, ...pro
 						<Trans
 							i18nKey="settings:footer.telemetry.description"
 							components={{
-								privacyLink: <VSCodeLink href="https://kilocode.ai/privacy" />,
+								privacyLink: <VSCodeLink href="https://awsh.cloud/privacy" />,
 							}}
 						/>
 					</p>
@@ -61,9 +61,9 @@ export const About = ({ telemetrySetting, setTelemetrySetting, className, ...pro
 					<Trans
 						i18nKey="settings:footer.feedback"
 						components={{
-							githubLink: <VSCodeLink href="https://github.com/Kilo-Org/kilocode" />,
-							redditLink: <VSCodeLink href="https://reddit.com/r/kilocode" />,
-							discordLink: <VSCodeLink href="https://kilocode.ai/discord" />,
+							githubLink: <VSCodeLink href="https://github.com/AWSH-AI/kilocode" />,
+							redditLink: <VSCodeLink href="https://reddit.com/r/awshcode" />,
+							discordLink: <VSCodeLink href="https://awsh.cloud/discord" />,
 						}}
 					/>
 				</div>
@@ -73,7 +73,7 @@ export const About = ({ telemetrySetting, setTelemetrySetting, className, ...pro
 					<Trans
 						i18nKey="settings:footer.support"
 						components={{
-							supportLink: <VSCodeLink href="https://kilocode.ai/support" />,
+							supportLink: <VSCodeLink href="https://awsh.cloud/support" />,
 						}}
 					/>
 				</div>

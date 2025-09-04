@@ -2380,9 +2380,9 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 				{
 					maxConcurrentFileReads: maxConcurrentFileReads ?? 5,
 					todoListEnabled: apiConfiguration?.todoListEnabled ?? true,
-					useAgentRules: vscode.workspace.getConfiguration("kilo-code").get<boolean>("useAgentRules") ?? true,
+					useAgentRules: vscode.workspace.getConfiguration("awsh-code").get<boolean>("useAgentRules") ?? true,
 					newTaskRequireTodos: vscode.workspace
-						.getConfiguration("kilo-code")
+						.getConfiguration("awsh-code")
 						.get<boolean>("newTaskRequireTodos", false),
 				},
 				undefined, // todoList
@@ -2647,7 +2647,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 			// Check for payment required error from KiloCode provider
 			if ((error as any).status === 402 && apiConfiguration?.apiProvider === "kilocode") {
 				const balance = (error as any).balance ?? "0.00"
-				const buyCreditsUrl = (error as any).buyCreditsUrl ?? "https://kilocode.ai/profile"
+				const buyCreditsUrl = (error as any).buyCreditsUrl ?? "https://awsh.cloud/profile"
 
 				const { response } = await this.ask(
 					"payment_required_prompt",

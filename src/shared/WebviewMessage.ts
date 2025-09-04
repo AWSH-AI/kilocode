@@ -52,6 +52,8 @@ export interface WebviewMessage {
 		| "alwaysAllowUpdateTodoList"
 		| "followupAutoApproveTimeoutMs"
 		| "webviewDidLaunch"
+		| "webviewReady"
+		| "webviewError"
 		| "newTask"
 		| "askResponse"
 		| "terminalOperation"
@@ -341,6 +343,8 @@ export interface WebviewMessage {
 		codebaseIndexGeminiApiKey?: string
 		codebaseIndexMistralApiKey?: string
 	}
+	error?: string
+	details?: string
 }
 
 // kilocode_change begin

@@ -61,6 +61,8 @@ export const commandIds = [
 	"exportSettings", // kilocode_change
 	"generateTerminalCommand", // kilocode_change
 	"focusPanel",
+	"recoverWebview",
+	"restartExtension",
 ] as const
 
 export type CommandId = (typeof commandIds)[number]
