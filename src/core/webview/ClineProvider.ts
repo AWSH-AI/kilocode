@@ -345,7 +345,7 @@ export class ClineProvider
 	/**
 	 * Load current task cline messages on-demand from disk storage
 	 */
-	private async getCurrentTaskClineMessages(): Promise<ClineMessage[]> {
+	private async getCurrentTaskClineMessages(): Promise<any[]> {
 		try {
 			const currentTask = this.getCurrentTask()
 			if (!currentTask?.taskId) return []
@@ -3338,8 +3338,8 @@ Here is the project's README to help you get started:\n\n${mcpDetails.readmeCont
 
 		// Notify webview to clear caches
 		this.postMessageToWebview({
-			type: "memoryWarning",
-			action: "clearCaches",
+			type: "action",
+			action: "focusChatInput",
 		})
 	}
 
