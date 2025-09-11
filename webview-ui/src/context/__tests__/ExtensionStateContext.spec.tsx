@@ -258,6 +258,7 @@ describe("mergeExtensionState", () => {
 			kilocodeDefaultModel: openRouterDefaultModelId,
 			alwaysAllowFollowupQuestions: true,
 			followupAutoApproveTimeoutMs: 5000,
+			taskHistory: [],
 		}
 
 		const prevState: ExtensionState = {

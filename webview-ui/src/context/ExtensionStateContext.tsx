@@ -291,6 +291,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		openRouterImageApiKey: "",
 		kiloCodeImageApiKey: "",
 		openRouterImageGenerationSelectedModel: "",
+		taskHistory: [],
 	})
 
 	const [didHydrateState, setDidHydrateState] = useState(false)
