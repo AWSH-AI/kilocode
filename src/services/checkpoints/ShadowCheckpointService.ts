@@ -17,12 +17,22 @@ import { getExcludePatterns } from "./excludes"
 import { TelemetryService } from "@roo-code/telemetry"
 import { TelemetryEventName } from "@roo-code/types"
 import { stringifyError } from "../../shared/kilocode/errorUtils"
+import * as vscode from "vscode"
+import { t } from "../../i18n"
 
 function reportError(callsite: string, error: unknown) {
 	TelemetryService.instance.captureEvent(TelemetryEventName.CHECKPOINT_FAILURE, {
 		callsite,
 		error: stringifyError(error),
 	})
+}
+
+const warningsShown = new Set<string>()
+function showWarning(message: string) {
+	if (warningsShown.size < 5 && !warningsShown.has(message)) {
+		vscode.window.showWarningMessage(message, t("kilocode:checkpoints.dismissWarning"))
+		warningsShown.add(message)
+	}
 }
 // kilocode_change end
 
@@ -65,6 +75,7 @@ export abstract class ShadowCheckpointService extends EventEmitter {
 		const protectedPaths = [homedir, desktopPath, documentsPath, downloadsPath]
 
 		if (protectedPaths.includes(workspaceDir)) {
+			showWarning(t("kilocode:checkpoints.protectedPaths", { workspaceDir })) // kilocode_change
 			throw new Error(`Cannot use checkpoints in ${workspaceDir}`)
 		}
 
@@ -84,6 +95,7 @@ export abstract class ShadowCheckpointService extends EventEmitter {
 		const hasNestedGitRepos = await this.hasNestedGitRepositories()
 
 		if (hasNestedGitRepos) {
+			showWarning(t("kilocode:checkpoints.nestedGitRepos")) // kilocode_change
 			throw new Error(
 				"Checkpoints are disabled because nested git repositories were detected in the workspace. " +
 					"Please remove or relocate nested git repositories to use the checkpoints feature.",
@@ -216,7 +228,7 @@ export abstract class ShadowCheckpointService extends EventEmitter {
 
 	public async saveCheckpoint(
 		message: string,
-		options?: { allowEmpty?: boolean },
+		options?: { allowEmpty?: boolean; suppressMessage?: boolean },
 	): Promise<CheckpointResult | undefined> {
 		try {
 			this.log(
@@ -237,7 +249,13 @@ export abstract class ShadowCheckpointService extends EventEmitter {
 			const duration = Date.now() - startTime
 
 			if (result.commit) {
-				this.emit("checkpoint", { type: "checkpoint", fromHash, toHash, duration })
+				this.emit("checkpoint", {
+					type: "checkpoint",
+					fromHash,
+					toHash,
+					duration,
+					suppressMessage: options?.suppressMessage ?? false,
+				})
 			}
 
 			if (result.commit) {

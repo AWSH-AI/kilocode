@@ -13,11 +13,19 @@
 		"addCredit": "Přidat kredit",
 		"lowBalance": "Tvůj Kilo Code zůstatek je nízký"
 	},
+	"invalidModel": {
+		"alphaPeriodEnded": "🎉 Alfa období pro {{model}} skončilo! Změň na jiný model pro pokračování.",
+		"modelUnavailable": "⚠️ Model {{model}} není dostupný. Změň na jiný model pro pokračování.",
+		"continueWith": "Pokračovat s {{model}}",
+		"continue": "Pokračovat"
+	},
 	"pricing": {
 		"costUnknown": "neznámé náklady",
 		"costUnknownDescription": "Poskytovatel API neposkytl žádné údaje o nákladech nebo byl požadavek zrušen.",
 		"freeModelsDescription": "Bezplatné modely mohou mít limity na počet požadavků. Použij odkaz níže pro optimalizaci využití bezplatných modelů!",
-		"freeModelsLink": "Objevte možnosti bezplatných a rozpočtových modelů"
+		"freeModelsLink": "Objevte možnosti bezplatných a rozpočtových modelů",
+		"openRouterMarkup": "Poskytovatel Kilo Code zahrnuje všechny modely OpenRouter, bez přirážky a s 0% provizí!",
+		"switchToKiloCode": "Přepnout na Kilo Code"
 	},
 	"notifications": {
 		"toolRequest": "Požadavek na nástroj čeká na schválení",
@@ -91,7 +99,8 @@
 		"condense": {
 			"wantsToCondense": "Kilo Code chce zkrátit tvou konverzaci",
 			"condenseConversation": "Zkrátit konverzaci"
-		}
+		},
+		"seeNewChanges": "Zobrazit nové změny"
 	},
 	"newTaskPreview": {
 		"task": "Úkol"
@@ -186,41 +195,37 @@
 		}
 	},
 	"ghost": {
-		"title": "Inline asistence",
+		"title": "Autocomplete",
 		"settings": {
-			"autoTrigger": "Automatické spuštění",
-			"enableQuickInlineTaskKeybinding": {
-				"label": "Rychlý inline úkol",
-				"description": "Potřebujete jen rychlou změnu? Vyberte nějaký kód (nebo ne!) a stiskněte Cmd+I. Popište svůj cíl běžnou češtinou (\"vytvořit React komponentu s těmito props\", \"přidat ošetření chyb do této funkce\") a získejte několik připravených návrhů přímo ve svém editoru. <DocsLink>Zobrazit zkratku</DocsLink>"
-			},
-			"enableAutoInlineTaskKeybinding": {
-				"label": "Automatický inline úkol",
-				"description": "Potřebujete rychlou opravu, doplnění nebo refaktoring? Kilo využije okolní kontext a nabídne okamžitá vylepšení, abyste neztratili tempo. <DocsLink>Zobrazit klávesovou zkratku</DocsLink>"
-			},
+			"autoTrigger": "Automatické Spuštění",
+			"triggers": "Spouštěče",
+			"keybindingDescription": "Funkce Autocomplete lze spustit pomocí příkazů. Můžeš nakonfigurovat <DocsLink>Klávesové Zkratky zde</DocsLink>.",
 			"enableAutoTrigger": {
-				"label": "Povolit automatické spuštění",
-				"description": "Když je povoleno, Kilo Code automaticky spustí Inline Assist, když přestaneš psát. To může být užitečné pro rychlé opravy a návrhy."
+				"label": "Povolit Autocomplete",
+				"description": "Když je povoleno, Kilo Code automaticky spustí Autocomplete, když přestaneš psát. To může být užitečné pro rychlé opravy a návrhy."
 			},
 			"autoTriggerDelay": {
-				"label": "Zpoždění automatického spuštění",
-				"description": "Zpoždění v sekundách před tím, než Kilo Code spustí Inline Assist poté, co přestaneš psát. Kratší zpoždění znamená rychlejší návrhy, ale může být náročnější na zdroje."
+				"label": "Zpoždění Automatického Spuštění",
+				"description": "Zpoždění v sekundách před tím, než Kilo Code spustí Autocomplete poté, co přestaneš psát. Kratší zpoždění znamená rychlejší návrhy, ale může být náročnější na zdroje."
+			},
+			"enableQuickInlineTaskKeybinding": {
+				"label": "Rychlý Úkol",
+				"description": "Potřebuješ jen rychlou změnu? Vyber nějaký kód (nebo ne!) a stiskni Cmd+I. Popiš svůj cíl v jednoduché češtině (\"vytvoř React komponentu s těmito props\", \"přidej zpracování chyb do této funkce\"), a získej několik připravených návrhů přímo ve svém editoru. <DocsLink>Zobrazit zkratku</DocsLink>"
 			},
 			"enableSmartInlineTaskKeybinding": {
-				"label": "Chytrý inline úkol",
-				"description": "Potřebuješ rychlou opravu, dokončení nebo refaktoring? Kilo použije okolní kontext k nabídnutí okamžitých vylepšení, což tě udrží v pracovním tempu. <DocsLink>Zobrazit zkratku</DocsLink>"
+				"label": "Manuální Autocomplete",
+				"description": "Potřebuješ rychlou opravu, dokončení nebo refaktoring? Kilo použije okolní kontext k nabídnutí okamžitých vylepšení, udržujíc tě v toku. <DocsLink>Zobrazit zkratku</DocsLink>"
 			},
 			"enableCustomProvider": {
 				"label": "Použít vlastního poskytovatele",
-				"description": "Inline Assist používá vaše přihlašovací údaje KiloCode / OpenRouter / Mistral pro výchozí použití modelu Codestral"
+				"description": "Autocomplete používá tvé přihlašovací údaje KiloCode / OpenRouter / Mistral k použití modelu Codestral ve výchozím nastavení"
 			},
 			"provider": "Poskytovatel",
 			"apiConfigId": {
 				"label": "Konfigurace API",
 				"current": "Použít aktuálně vybranou konfiguraci API",
-				"description": "Vyberte konfiguraci API, kterou chcete použít pro výzvy Inline Assist, nebo prostě použijte tu, která je aktuálně vybrána"
-			},
-			"triggers": "Spouštěče",
-			"keybindingDescription": "Funkce Inline Assist jsou spouštěny příkazy. <DocsLink>Klávesové zkratky si můžete nakonfigurovat zde</DocsLink>."
+				"description": "Vyber konfiguraci API pro použití v Autocomplete promptech, nebo jen použij tu, která je aktuálně vybraná"
+			}
 		}
 	},
 	"virtualProvider": {
@@ -244,5 +249,10 @@
 		"perHour": "Za hodinu",
 		"requestsLabel": "Požadavky",
 		"perDay": "Za den"
+	},
+	"imageWarnings": {
+		"modelNoImageSupport": "Obrázky nejsou podporovány aktuálním modelem.",
+		"maxImagesReached": "Maximálně 20 obrázků na zprávu. Odstraňte některé obrázky, abyste mohli přidat další.",
+		"imagesRemovedNoSupport": "Obrázky odstraněny, nejsou podporovány modelem."
 	}
 }

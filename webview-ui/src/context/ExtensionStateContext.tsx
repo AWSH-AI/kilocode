@@ -9,9 +9,10 @@ import {
 	GhostServiceSettings, // kilocode_change
 	openRouterDefaultModelId, // kilocode_change
 	type TodoItem,
+	type TelemetrySetting,
+	type OrganizationAllowList,
+	ORGANIZATION_ALLOW_ALL,
 } from "@roo-code/types"
-
-import { type OrganizationAllowList, ORGANIZATION_ALLOW_ALL } from "@roo/cloud"
 
 import { ExtensionMessage, ExtensionState, MarketplaceInstalledMetadata, Command } from "@roo/ExtensionMessage"
 import { findLastIndex } from "@roo/array"
@@ -20,7 +21,6 @@ import { checkExistKey } from "@roo/checkExistApiConfig"
 import { Mode, defaultModeSlug, defaultPrompts } from "@roo/modes"
 import { CustomSupportPrompts } from "@roo/support-prompt"
 import { experimentDefault } from "@roo/experiments"
-import { TelemetrySetting } from "@roo/TelemetrySetting"
 import { RouterModels } from "@roo/api"
 import { McpMarketplaceCatalog } from "../../../src/shared/kilocode/mcp" // kilocode_change
 
@@ -202,7 +202,8 @@ export const mergeExtensionState = (prevState: ExtensionState, newState: Extensi
 }
 
 export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [state, setState] = useState<ExtensionState & { organizationAllowList?: OrganizationAllowList }>({
+	const [state, setState] = useState<ExtensionState>({
+		apiConfiguration: {},
 		version: "",
 		clineMessages: [],
 		shouldShowAnnouncement: false,
@@ -289,6 +290,9 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		commands: [],
 		alwaysAllowFollowupQuestions: false,
 		followupAutoApproveTimeoutMs: undefined,
+		openRouterImageApiKey: "",
+		kiloCodeImageApiKey: "",
+		openRouterImageGenerationSelectedModel: "",
 	})
 
 	const [didHydrateState, setDidHydrateState] = useState(false)

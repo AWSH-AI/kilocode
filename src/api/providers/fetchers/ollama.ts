@@ -37,20 +37,27 @@ type OllamaModelsResponse = z.infer<typeof OllamaModelsResponseSchema>
 
 type OllamaModelInfoResponse = z.infer<typeof OllamaModelInfoResponseSchema>
 
-export const parseOllamaModel = (rawModel: OllamaModelInfoResponse): ModelInfo => {
+export const parseOllamaModel = (
+	rawModel: OllamaModelInfoResponse,
+	baseUrl?: string, // kilocode_change
+): ModelInfo => {
 	// kilocode_change start
+	const contextKey = Object.keys(rawModel.model_info).find((k) => k.includes("context_length"))
+	const contextLengthFromModelInfo =
+		contextKey && typeof rawModel.model_info[contextKey] === "number" ? rawModel.model_info[contextKey] : undefined
+
 	const contextLengthFromModelParameters =
 		typeof rawModel.parameters === "string"
 			? parseInt(rawModel.parameters.match(/^num_ctx\s+(\d+)/m)?.[1] ?? "", 10) || undefined
 			: undefined
 
-	const contextLengthFromEnvironment = parseInt(process.env.OLLAMA_CONTEXT_LENGTH || "4096", 10)
+	const contextLengthFromEnvironment = parseInt(process.env.OLLAMA_CONTEXT_LENGTH ?? "", 10) || undefined
 
-	let contextWindow = contextLengthFromModelParameters ?? contextLengthFromEnvironment
-
-	if (contextWindow == 40960 && !contextLengthFromModelParameters) {
-		contextWindow = 4096 // For some unknown reason, Ollama returns an undefind context as "40960" rather than 4096, which is what it actually enforces.
-	}
+	const contextWindow =
+		(baseUrl?.toLowerCase().startsWith("https://ollama.com") ? contextLengthFromModelInfo : undefined) ??
+		contextLengthFromEnvironment ??
+		(contextLengthFromModelParameters !== 40960 ? contextLengthFromModelParameters : undefined) ?? // Alledgedly Ollama sometimes returns an undefind context as 40960
+		4096 // This is usually the default: https://github.com/ollama/ollama/blob/4383a3ab7a075eff78b31f7dc84c747e2fcd22b8/docs/faq.md#how-can-i-specify-the-context-window-size
 	// kilocode_change end
 
 	const modelInfo: ModelInfo = Object.assign({}, ollamaDefaultModelInfo, {
@@ -88,7 +95,10 @@ export async function getOllamaModels(baseUrl = "http://localhost:11434"): Promi
 							model: ollamaModel.model,
 						})
 						.then((ollamaModelInfo) => {
-							models[ollamaModel.name] = parseOllamaModel(ollamaModelInfo.data)
+							models[ollamaModel.name] = parseOllamaModel(
+								ollamaModelInfo.data,
+								baseUrl, // kilocode_change
+							)
 						}),
 				)
 			}
