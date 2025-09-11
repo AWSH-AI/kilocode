@@ -1,5 +1,5 @@
 {
-	"name": "kilo-code",
+	"name": "awsh-code",
 	"packageManager": "pnpm@10.8.1",
 	"engines": {
 		"node": "20.19.2"
@@ -29,8 +29,8 @@
 		"npm:publish:types": "pnpm --filter @roo-code/types npm:publish",
 		"link-workspace-packages": "tsx scripts/link-packages.ts",
 		"unlink-workspace-packages": "tsx scripts/link-packages.ts --unlink",
-		"docs:start": "pnpm --filter kilocode-docs start",
-		"docs:build": "pnpm --filter kilocode-docs build"
+		"docs:start": "pnpm --filter awsh-code-docs start",
+		"docs:build": "pnpm --filter awsh-code-docs build"
 	},
 	"devDependencies": {
 		"@changesets/changelog-github": "^0.5.1",

@@ -230,7 +230,6 @@ describe("mergeExtensionState", () => {
 			mcpEnabled: false,
 			enableMcpServerCreation: false,
 			clineMessages: [],
-			taskHistory: [],
 			shouldShowAnnouncement: false,
 			enableCheckpoints: true,
 			writeDelayMs: 1000,
@@ -257,6 +256,9 @@ describe("mergeExtensionState", () => {
 			maxImageFileSize: 5,
 			maxTotalImageSize: 20,
 			kilocodeDefaultModel: openRouterDefaultModelId,
+			commands: [],
+			alwaysAllowFollowupQuestions: true,
+			followupAutoApproveTimeoutMs: 5000,
 		}
 
 		const prevState: ExtensionState = {

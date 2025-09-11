@@ -15,7 +15,7 @@
 	"command.terminal.explainCommand.title": "Expliquer cette Commande",
 	"command.terminal.generateCommand.title": "Kilo Code : Générer une Commande de Terminal",
 	"command.acceptInput.title": "Accepter l'Entrée/Suggestion",
-	"command.generateCommitMessage.title": "Générer un message de commit avec Kilo",
+	"command.generateCommitMessage.title": "Générer un message de commit avec AWSH",
 	"views.activitybar.title": "AWSH Code",
 	"views.contextMenu.label": "AWSH Code",
 	"views.terminalMenu.label": "AWSH Code",

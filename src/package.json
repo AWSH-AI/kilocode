@@ -110,8 +110,8 @@
 				{
 					"id": "awsh-code-ActivityBar",
 					"title": "%views.activitybar.title%",
-					"icon": "assets/icons/kilo.png",
-					"darkIcon": "assets/icons/kilo-dark.png",
+					"icon": "assets/icons/awsh.png",
+					"darkIcon": "assets/icons/awsh-dark.png",
 					"when": "isMac"
 				}
 			]
@@ -251,8 +251,8 @@
 				"command": "awsh-code.generateCommitMessage",
 				"title": "%command.generateCommitMessage.title%",
 				"icon": {
-					"light": "assets/icons/kilo-light.svg",
-					"dark": "assets/icons/kilo-dark.svg"
+					"light": "assets/icons/awsh-light.svg",
+					"dark": "assets/icons/awsh-dark.svg"
 				},
 				"category": "%configuration.title%"
 			},

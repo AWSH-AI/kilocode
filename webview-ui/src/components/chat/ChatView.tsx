@@ -96,7 +96,6 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 		clineMessages: messages,
 		currentTaskItem,
 		currentTaskTodos,
-		taskHistory,
 		apiConfiguration,
 		organizationAllowList,
 		mcpServers,
@@ -128,6 +127,9 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 		soundVolume,
 		// cloudIsAuthenticated, // kilocode_change
 	} = useExtensionState()
+
+	// Local state for taskHistory
+	const [taskHistory, _setTaskHistory] = useState<any[]>([])
 
 	const messagesRef = useRef(messages)
 	useEffect(() => {

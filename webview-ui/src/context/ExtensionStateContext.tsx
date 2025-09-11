@@ -28,8 +28,9 @@ import { vscode } from "@src/utils/vscode"
 import { convertTextMateToHljs } from "@src/utils/textMateToHljs"
 import { ClineRulesToggles } from "@roo/cline-rules" // kilocode_change
 
-export interface ExtensionStateContextType extends ExtensionState {
+export interface ExtensionStateContextType extends Omit<ExtensionState, "marketplaceInstalledMetadata"> {
 	historyPreviewCollapsed?: boolean // Add the new state property
+	taskHistory?: any[] // Add task history property with any type for now
 	showTaskTimeline?: boolean // kilocode_change
 	setShowTaskTimeline: (value: boolean) => void // kilocode_change
 	hoveringTaskTimeline?: boolean // kilocode_change
@@ -204,7 +205,6 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 	const [state, setState] = useState<ExtensionState & { organizationAllowList?: OrganizationAllowList }>({
 		version: "",
 		clineMessages: [],
-		taskHistory: [],
 		shouldShowAnnouncement: false,
 		allowedCommands: [],
 		deniedCommands: [],
@@ -286,6 +286,9 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		alwaysAllowUpdateTodoList: true,
 		includeDiagnosticMessages: true,
 		maxDiagnosticMessages: 50,
+		commands: [],
+		alwaysAllowFollowupQuestions: false,
+		followupAutoApproveTimeoutMs: undefined,
 	})
 
 	const [didHydrateState, setDidHydrateState] = useState(false)
@@ -354,7 +357,12 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 						setMarketplaceItems(newState.marketplaceItems)
 					}
 					if (newState.marketplaceInstalledMetadata !== undefined) {
-						setMarketplaceInstalledMetadata(newState.marketplaceInstalledMetadata)
+						// Convert between the two types
+						const metadata = newState.marketplaceInstalledMetadata as any
+						setMarketplaceInstalledMetadata({
+							project: metadata.project || {},
+							global: metadata.global || {},
+						})
 					}
 					break
 				}
@@ -426,7 +434,10 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 						setMarketplaceItems(message.marketplaceItems)
 					}
 					if (message.marketplaceInstalledMetadata !== undefined) {
-						setMarketplaceInstalledMetadata(message.marketplaceInstalledMetadata)
+						setMarketplaceInstalledMetadata({
+							project: (message.marketplaceInstalledMetadata as any).project || {},
+							global: (message.marketplaceInstalledMetadata as any).global || {},
+						})
 					}
 					break
 				}
@@ -476,6 +487,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		profileThresholds: state.profileThresholds ?? {},
 		alwaysAllowFollowupQuestions,
 		followupAutoApproveTimeoutMs,
+		taskHistory: [],
 		remoteControlEnabled: state.remoteControlEnabled ?? false,
 		setExperimentEnabled: (id, enabled) =>
 			setState((prevState) => ({ ...prevState, experiments: { ...prevState.experiments, [id]: enabled } })),
