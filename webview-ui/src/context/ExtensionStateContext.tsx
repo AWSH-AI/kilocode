@@ -30,7 +30,6 @@ import { ClineRulesToggles } from "@roo/cline-rules" // kilocode_change
 
 export interface ExtensionStateContextType extends Omit<ExtensionState, "marketplaceInstalledMetadata"> {
 	historyPreviewCollapsed?: boolean // Add the new state property
-	taskHistory?: any[] // Add task history property with any type for now
 	showTaskTimeline?: boolean // kilocode_change
 	setShowTaskTimeline: (value: boolean) => void // kilocode_change
 	hoveringTaskTimeline?: boolean // kilocode_change
@@ -287,7 +286,6 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		alwaysAllowUpdateTodoList: true,
 		includeDiagnosticMessages: true,
 		maxDiagnosticMessages: 50,
-		commands: [],
 		alwaysAllowFollowupQuestions: false,
 		followupAutoApproveTimeoutMs: undefined,
 		openRouterImageApiKey: "",
