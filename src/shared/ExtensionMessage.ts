@@ -9,8 +9,11 @@ import type {
 	ClineMessage,
 	MarketplaceItem,
 	TodoItem,
+	CloudUserInfo,
+	OrganizationAllowList,
+	ShareVisibility,
+	QueuedMessage,
 } from "@roo-code/types"
-import type { CloudUserInfo, OrganizationAllowList, ShareVisibility } from "@roo-code/cloud"
 
 import { GitCommit } from "../utils/git"
 
@@ -20,11 +23,12 @@ import { Mode } from "./modes"
 import { ModelRecord, RouterModels } from "./api"
 import { ProfileDataResponsePayload, BalanceDataResponsePayload } from "./WebviewMessage" // kilocode_change
 import { ClineRulesToggles } from "./cline-rules" // kilocode_change
+import { KiloCodeWrapperProperties } from "./kilocode/wrapper" // kilocode_change
 
 // Command interface for frontend/backend communication
 export interface Command {
 	name: string
-	source: "global" | "project"
+	source: "global" | "project" | "built-in"
 	filePath?: string
 	description?: string
 	argumentHint?: string
@@ -136,7 +140,6 @@ export interface ExtensionMessage {
 		| "usageDataResponse" // kilocode_change
 		| "commands"
 		| "insertTextIntoTextarea"
-		| "memoryWarning"
 	text?: string
 	payload?: ProfileDataResponsePayload | BalanceDataResponsePayload // kilocode_change: Add payload for profile and balance data
 	action?:
@@ -147,12 +150,11 @@ export interface ExtensionMessage {
 		| "promptsButtonClicked"
 		| "profileButtonClicked" // kilocode_change
 		| "marketplaceButtonClicked"
-		| "accountButtonClicked"
+		| "cloudButtonClicked"
 		| "didBecomeVisible"
 		| "focusInput"
 		| "switchTab"
 		| "focusChatInput" // kilocode_change
-		| "clearCaches"
 	invoke?: "newChat" | "sendMessage" | "primaryButtonClick" | "secondaryButtonClick" | "setChatBoxMessage"
 	state?: ExtensionState
 	images?: string[]
@@ -226,6 +228,7 @@ export interface ExtensionMessage {
 	rulesFolderPath?: string
 	settings?: any
 	messageTs?: number
+	hasCheckpoint?: boolean
 	context?: string
 	// kilocode_change start: Notifications
 	notifications?: Array<{
@@ -239,6 +242,7 @@ export interface ExtensionMessage {
 	}>
 	// kilocode_change end
 	commands?: Command[]
+	queuedMessages?: QueuedMessage[]
 }
 
 export type ExtensionState = Pick<
@@ -262,8 +266,10 @@ export type ExtensionState = Pick<
 	| "alwaysAllowMcp"
 	| "alwaysAllowModeSwitch"
 	| "alwaysAllowSubtasks"
+	| "alwaysAllowFollowupQuestions"
 	| "alwaysAllowExecute"
 	| "alwaysAllowUpdateTodoList"
+	| "followupAutoApproveTimeoutMs"
 	| "allowedCommands"
 	| "deniedCommands"
 	| "allowedMaxRequests"
@@ -273,6 +279,7 @@ export type ExtensionState = Pick<
 	| "showAutoApproveMenu" // kilocode_change
 	| "screenshotQuality"
 	| "remoteBrowserEnabled"
+	| "cachedChromeHostUrl"
 	| "remoteBrowserHost"
 	// | "enableCheckpoints" // Optional in GlobalSettings, required here.
 	| "ttsEnabled"
@@ -328,21 +335,23 @@ export type ExtensionState = Pick<
 	| "includeDiagnosticMessages"
 	| "maxDiagnosticMessages"
 	| "remoteControlEnabled"
+	| "openRouterImageGenerationSelectedModel"
+	| "includeTaskHistoryInEnhance"
 > & {
 	version: string
-	// Remove clineMessages and taskHistory from global state to prevent memory issues
-	// These will be loaded on-demand from disk storage instead
-	clineMessages: ClineMessage[] // Loaded on-demand, not stored in global state
+	clineMessages: ClineMessage[]
 	currentTaskItem?: HistoryItem
 	currentTaskTodos?: TodoItem[] // Initial todos for the current task
-	apiConfiguration?: ProviderSettings
+	apiConfiguration: ProviderSettings
 	uriScheme?: string
 	uiKind?: string // kilocode_change
+
+	kiloCodeWrapperProperties?: KiloCodeWrapperProperties // kilocode_change: Wrapper information
+
 	kilocodeDefaultModel: string
 	shouldShowAnnouncement: boolean
 
-	// Remove taskHistory from global state - will be loaded on-demand
-	// taskHistory: HistoryItem[] // Loaded on-demand, not stored in global state
+	taskHistory: HistoryItem[]
 
 	writeDelayMs: number
 	requestDelaySeconds: number
@@ -385,14 +394,18 @@ export type ExtensionState = Pick<
 	autoCondenseContext: boolean
 	autoCondenseContextPercent: number
 	marketplaceItems?: MarketplaceItem[]
-	marketplaceInstalledMetadata?: { project: Record<string, any>; version: string } | undefined
-	commands: Command[]
-	maxConcurrentFileReads?: number
-	allowVeryLargeReads?: boolean // kilocode_change
+	marketplaceInstalledMetadata?: { project: Record<string, any>; global: Record<string, any> }
+	profileThresholds: Record<string, number>
+	hasOpenedModeSelector: boolean
+	openRouterImageApiKey?: string
+	kiloCodeImageApiKey?: string
+	openRouterUseMiddleOutTransform?: boolean
+	messageQueue?: QueuedMessage[]
+	lastShownAnnouncementId?: string
+	apiModelId?: string
+	mcpServers?: McpServer[]
+	hasSystemPromptOverride?: boolean
 	mdmCompliant?: boolean
-	hasOpenedModeSelector: boolean // New property to track if user has opened mode selector
-	alwaysAllowFollowupQuestions: boolean // New property for follow-up questions auto-approve
-	followupAutoApproveTimeoutMs: number | undefined // Timeout in ms for auto-approving follow-up questions
 }
 
 export interface ClineSayTool {
@@ -412,6 +425,9 @@ export interface ClineSayTool {
 		| "finishTask"
 		| "searchAndReplace"
 		| "insertContent"
+		| "generateImage"
+		| "imageGenerated"
+		| "runSlashCommand"
 	path?: string
 	diff?: string
 	content?: string
@@ -456,6 +472,12 @@ export interface ClineSayTool {
 		cost?: number
 	}
 	// kilocode_change end
+	imageData?: string // Base64 encoded image data for generated images
+	// Properties for runSlashCommand tool
+	command?: string
+	args?: string
+	source?: string
+	description?: string
 }
 
 // Must keep in sync with system prompt.

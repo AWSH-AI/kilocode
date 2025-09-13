@@ -13,11 +13,19 @@
 		"addCredit": "Guthaben hinzufügen",
 		"lowBalance": "Ihr Kilo Code Guthaben ist niedrig"
 	},
+	"invalidModel": {
+		"alphaPeriodEnded": "🎉 Die Alpha-Phase für {{model}} ist beendet! Wechsle zu einem anderen Modell, um fortzufahren.",
+		"modelUnavailable": "⚠️ Das Modell {{model}} ist nicht verfügbar. Wechsle zu einem anderen Modell, um fortzufahren.",
+		"continueWith": "Mit {{model}} fortfahren",
+		"continue": "Fortfahren"
+	},
 	"pricing": {
 		"costUnknown": "Kosten unbekannt",
 		"costUnknownDescription": "Der API-Anbieter hat keine Kostendaten bereitgestellt oder die Anfrage wurde abgebrochen.",
 		"freeModelsDescription": "Kostenlose Modelle können Ratenbeschränkungen haben. Nutze den Link unten, um deine kostenlose Modellnutzung zu optimieren!",
-		"freeModelsLink": "Kostenlose und Budget-Modelloptionen entdecken"
+		"freeModelsLink": "Kostenlose und Budget-Modelloptionen entdecken",
+		"openRouterMarkup": "Der Kilo Code Anbieter umfasst alle OpenRouter-Modelle, ohne Aufschlag und mit 0% Provision!",
+		"switchToKiloCode": "Zu Kilo Code wechseln"
 	},
 	"notifications": {
 		"toolRequest": "Werkzeuganfrage wartet auf Genehmigung",
@@ -91,7 +99,8 @@
 		"condense": {
 			"wantsToCondense": "Kilo Code möchte deine Unterhaltung zusammenfassen",
 			"condenseConversation": "Unterhaltung zusammenfassen"
-		}
+		},
+		"seeNewChanges": "Neue Änderungen anzeigen"
 	},
 	"newTaskPreview": {
 		"task": "Aufgabe"
@@ -186,41 +195,37 @@
 		}
 	},
 	"ghost": {
-		"title": "Inline-Unterstützung",
+		"title": "Autocomplete",
 		"settings": {
-			"autoTrigger": "Automatischer Auslöser",
-			"enableQuickInlineTaskKeybinding": {
-				"label": "Schnelle Inline-Aufgabe",
-				"description": "Brauchst du nur eine schnelle Änderung? Wähle etwas Code aus (oder auch nicht!) und drücke Cmd+I. Beschreibe dein Ziel in einfachem Deutsch (\"erstelle eine React-Komponente mit diesen Props\", \"füge Fehlerbehandlung zu dieser Funktion hinzu\") und erhalte mehrere, sofort einsetzbare Vorschläge direkt in deinem Editor. <DocsLink>Siehe Tastenkombination</DocsLink>"
-			},
-			"enableAutoInlineTaskKeybinding": {
-				"label": "Auto Inline Aufgabe",
-				"description": "Brauchest du eine schnelle Korrektur, Vervollständigung oder Umstrukturierung? Kilo nutzt den umliegenden Kontext, um sofortige Verbesserungen anzubieten und dich im Flow zu halten. <DocsLink>Tastenkombination anzeigen</DocsLink>"
-			},
+			"autoTrigger": "Auto-Auslösung",
+			"triggers": "Auslöser",
+			"keybindingDescription": "Autocomplete-Funktionen können durch Befehle ausgelöst werden. Du kannst die <DocsLink>Tastenkombinationen hier</DocsLink> konfigurieren.",
 			"enableAutoTrigger": {
-				"label": "Automatischen Auslöser aktivieren",
-				"description": "Wenn aktiviert, löst Kilo Code automatisch die Inline-Assistenz aus, wenn du aufhörst zu tippen. Dies kann für schnelle Korrekturen und Vorschläge nützlich sein."
+				"label": "Autocomplete aktivieren",
+				"description": "Wenn aktiviert, löst Kilo Code automatisch Autocomplete aus, wenn du aufhörst zu tippen. Dies kann für schnelle Korrekturen und Vorschläge nützlich sein."
 			},
 			"autoTriggerDelay": {
-				"label": "Verzögerung des automatischen Auslösers",
-				"description": "Die Verzögerung in Sekunden, bevor Kilo Code die Inline-Assistenz auslöst, nachdem du aufgehört hast zu tippen. Eine kürzere Verzögerung bedeutet schnellere Vorschläge, kann aber ressourcenintensiver sein."
+				"label": "Auto-Auslöseverzögerung",
+				"description": "Die Verzögerung in Sekunden, bevor Kilo Code Autocomplete auslöst, nachdem du aufgehört hast zu tippen. Eine kürzere Verzögerung bedeutet schnellere Vorschläge, kann aber ressourcenintensiver sein."
+			},
+			"enableQuickInlineTaskKeybinding": {
+				"label": "Schnellaufgabe",
+				"description": "Brauchst du nur eine schnelle Änderung? Wähle etwas Code aus (oder auch nicht!) und drücke Cmd+I. Beschreibe dein Ziel in einfachem Deutsch (\"erstelle eine React-Komponente mit diesen Props\", \"füge Fehlerbehandlung zu dieser Funktion hinzu\"), und erhalte mehrere, sofort verwendbare Vorschläge direkt in deinem Editor. <DocsLink>Tastenkombination ansehen</DocsLink>"
 			},
 			"enableSmartInlineTaskKeybinding": {
-				"label": "Intelligente Inline-Aufgabe",
-				"description": "Brauchst du eine schnelle Korrektur, Vervollständigung oder Refaktorierung? Kilo nutzt den umgebenden Kontext, um sofortige Verbesserungen anzubieten und dich im Flow zu halten. <DocsLink>Tastenkürzel anzeigen</DocsLink>"
+				"label": "Manuelles Autocomplete",
+				"description": "Brauchst du eine schnelle Korrektur, Vervollständigung oder Refaktorierung? Kilo wird den umgebenden Kontext nutzen, um sofortige Verbesserungen anzubieten und dich im Flow zu halten. <DocsLink>Tastenkombination ansehen</DocsLink>"
 			},
 			"enableCustomProvider": {
 				"label": "Benutzerdefinierten Anbieter verwenden",
-				"description": "Inline-Unterstützung verwendet deine KiloCode / OpenRouter / Mistral Zugangsdaten, um standardmäßig das Codestral-Modell zu verwenden"
+				"description": "Autocomplete verwendet standardmäßig deine KiloCode / OpenRouter / Mistral-Anmeldedaten, um das Codestral-Modell zu verwenden"
 			},
 			"provider": "Anbieter",
 			"apiConfigId": {
 				"label": "API-Konfiguration",
 				"current": "Aktuell ausgewählte API-Konfiguration verwenden",
-				"description": "Wähle eine API-Konfiguration für Inline-Assist-Prompts aus oder verwende einfach die aktuell ausgewählte"
-			},
-			"triggers": "Auslöser",
-			"keybindingDescription": "Inline-Assistenzfunktionen werden durch Befehle ausgelöst. Du kannst die <DocsLink>Tastaturkürzel hier konfigurieren</DocsLink>."
+				"description": "Wähle eine API-Konfiguration für Autocomplete-Prompts aus oder verwende einfach die aktuell ausgewählte"
+			}
 		}
 	},
 	"virtualProvider": {
@@ -244,5 +249,10 @@
 		"perMinute": "Pro Minute",
 		"requestsLabel": "Anfragen",
 		"perDay": "Pro Tag"
+	},
+	"imageWarnings": {
+		"modelNoImageSupport": "Bilder werden vom aktuellen Modell nicht unterstützt.",
+		"maxImagesReached": "Maximal 20 Bilder pro Nachricht. Entfernen Sie einige Bilder, um weitere hinzuzufügen.",
+		"imagesRemovedNoSupport": "Bilder entfernt, vom Modell nicht unterstützt."
 	}
 }

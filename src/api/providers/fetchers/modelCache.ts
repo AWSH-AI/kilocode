@@ -6,10 +6,11 @@ import { safeWriteJson } from "../../../utils/safeWriteJson"
 
 import { ContextProxy } from "../../../core/config/ContextProxy"
 import { getCacheDirectoryPath } from "../../../utils/storage"
-import { RouterName, ModelRecord, cerebrasModels } from "../../../shared/api"
+import { RouterName, ModelRecord } from "../../../shared/api"
 import { fileExistsAtPath } from "../../../utils/fs"
 
 import { getOpenRouterModels } from "./openrouter"
+import { getVercelAiGatewayModels } from "./vercel-ai-gateway"
 import { getRequestyModels } from "./requesty"
 import { getGlamaModels } from "./glama"
 import { getUnboundModels } from "./unbound"
@@ -19,7 +20,12 @@ import { getKiloBaseUriFromToken } from "../../../shared/kilocode/token"
 import { getOllamaModels } from "./ollama"
 import { getLMStudioModels } from "./lmstudio"
 import { getIOIntelligenceModels } from "./io-intelligence"
-import { getDeepInfraModels } from "./deepinfra" // kilocode_change
+
+// kilocode_change start
+import { cerebrasModels } from "@roo-code/types"
+// kilocode_change end
+
+import { getDeepInfraModels } from "./deepinfra"
 const memoryCache = new NodeCache({ stdTTL: 5 * 60, checkperiod: 5 * 60 })
 
 export /*kilocode_change*/ async function writeModels(router: RouterName, data: ModelRecord) {
@@ -90,21 +96,24 @@ export const getModels = async (options: GetModelsOptions): Promise<ModelRecord>
 					headers: options.kilocodeToken ? { Authorization: `Bearer ${options.kilocodeToken}` } : undefined,
 				})
 				break
-			case "deepinfra":
-				models = await getDeepInfraModels(options.apiKey, options.baseUrl)
-				break
+			// kilocode_change end
 			case "cerebras":
 				models = cerebrasModels
 				break
-			// kilocode_change end
 			case "ollama":
 				models = await getOllamaModels(options.baseUrl)
 				break
 			case "lmstudio":
 				models = await getLMStudioModels(options.baseUrl)
 				break
+			case "deepinfra":
+				models = await getDeepInfraModels(options.apiKey, options.baseUrl)
+				break
 			case "io-intelligence":
 				models = await getIOIntelligenceModels(options.apiKey)
+				break
+			case "vercel-ai-gateway":
+				models = await getVercelAiGatewayModels()
 				break
 			default: {
 				// Ensures router is exhaustively checked if RouterName is a strict union

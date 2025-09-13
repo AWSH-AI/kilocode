@@ -10,10 +10,10 @@ import {
 	geminiModels,
 	// kilocode_change start
 	geminiCliModels,
-	qwenCodeModels,
 	// kilocode_change end
 	mistralModels,
 	openAiNativeModels,
+	qwenCodeModels,
 	vertexModels,
 	xaiModels,
 	groqModels,
@@ -37,10 +37,10 @@ export const MODELS_BY_PROVIDER: Partial<Record<ProviderName, Record<string, Mod
 	gemini: geminiModels,
 	// kilocode_change start
 	"gemini-cli": geminiCliModels,
-	"qwen-code": qwenCodeModels,
 	// kilocode_change end
 	mistral: mistralModels,
 	"openai-native": openAiNativeModels,
+	"qwen-code": qwenCodeModels,
 	vertex: vertexModels,
 	xai: xaiModels,
 	groq: groqModels,
@@ -54,6 +54,7 @@ export const MODELS_BY_PROVIDER: Partial<Record<ProviderName, Record<string, Mod
 
 export const PROVIDERS = [
 	{ value: "openrouter", label: "OpenRouter" },
+	{ value: "deepinfra", label: "DeepInfra" },
 	{ value: "anthropic", label: "Anthropic" },
 	{ value: "claude-code", label: "Claude Code" },
 	{ value: "cerebras", label: "Cerebras" },
@@ -62,12 +63,12 @@ export const PROVIDERS = [
 	// kilocode_change start
 	{ value: "gemini-cli", label: "Gemini CLI" },
 	{ value: "virtual-quota-fallback", label: "Virtual Quota Fallback" },
-	{ value: "qwen-code", label: "Qwen Code" },
 	// kilocode_change end
 	{ value: "deepseek", label: "DeepSeek" },
 	{ value: "moonshot", label: "Moonshot" },
 	{ value: "openai-native", label: "OpenAI" },
 	{ value: "openai", label: "OpenAI Compatible" },
+	{ value: "qwen-code", label: "Qwen Code" },
 	{ value: "vertex", label: "GCP Vertex AI" },
 	{ value: "bedrock", label: "Amazon Bedrock" },
 	{ value: "glama", label: "Glama" },
@@ -92,6 +93,7 @@ export const PROVIDERS = [
 	{ value: "deepinfra", label: "Deep Infra" },
 	// { value: "roo", label: "Roo Code Cloud" },
 	// kilocode_change end
+	{ value: "vercel-ai-gateway", label: "Vercel AI Gateway" },
 ].sort((a, b) => a.label.localeCompare(b.label))
 
 PROVIDERS.unshift({ value: "kilocode", label: "AWSH Code" }) // kilocode_change

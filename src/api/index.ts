@@ -13,7 +13,6 @@ import {
 	VertexHandler,
 	AnthropicVertexHandler,
 	OpenAiHandler,
-	// OllamaHandler, // kilocode_change
 	LmStudioHandler,
 	GeminiHandler,
 	OpenAiNativeHandler,
@@ -33,10 +32,9 @@ import {
 	// kilocode_change start
 	VirtualQuotaFallbackHandler,
 	GeminiCliHandler,
-	QwenCodeHandler,
-	DeepInfraHandler,
 	// kilocode_change end
 	ClaudeCodeHandler,
+	QwenCodeHandler,
 	SambaNovaHandler,
 	IOIntelligenceHandler,
 	DoubaoHandler,
@@ -44,6 +42,8 @@ import {
 	FireworksHandler,
 	RooHandler,
 	FeatherlessHandler,
+	VercelAiGatewayHandler,
+	DeepInfraHandler,
 } from "./providers"
 // kilocode_change start
 import { KilocodeOpenrouterHandler } from "./providers/kilocode-openrouter"
@@ -64,6 +64,14 @@ export interface ApiHandlerCreateMessageMetadata {
 	 * Used to enforce "skip once" after a condense operation.
 	 */
 	suppressPreviousResponseId?: boolean
+	/**
+	 * Controls whether the response should be stored for 30 days in OpenAI's Responses API.
+	 * When true (default), responses are stored and can be referenced in future requests
+	 * using the previous_response_id for efficient conversation continuity.
+	 * Set to false to opt out of response storage for privacy or compliance reasons.
+	 * @default true
+	 */
+	store?: boolean
 }
 
 export interface ApiHandler {
@@ -97,10 +105,6 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new GeminiCliHandler(options)
 		case "virtual-quota-fallback":
 			return new VirtualQuotaFallbackHandler(options)
-		case "qwen-code":
-			return new QwenCodeHandler(options)
-		case "deepinfra":
-			return new DeepInfraHandler(options)
 		// kilocode_change end
 		case "anthropic":
 			return new AnthropicHandler(options)
@@ -130,6 +134,8 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new DeepSeekHandler(options)
 		case "doubao":
 			return new DoubaoHandler(options)
+		case "qwen-code":
+			return new QwenCodeHandler(options)
 		case "moonshot":
 			return new MoonshotHandler(options)
 		case "vscode-lm":
@@ -148,6 +154,8 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new XAIHandler(options)
 		case "groq":
 			return new GroqHandler(options)
+		case "deepinfra":
+			return new DeepInfraHandler(options)
 		case "huggingface":
 			return new HuggingFaceHandler(options)
 		case "chutes":
@@ -170,6 +178,8 @@ export function buildApiHandler(configuration: ProviderSettings): ApiHandler {
 			return new RooHandler(options)
 		case "featherless":
 			return new FeatherlessHandler(options)
+		case "vercel-ai-gateway":
+			return new VercelAiGatewayHandler(options)
 		default:
 			apiProvider satisfies "gemini-cli" | undefined
 			return new AnthropicHandler(options)

@@ -13,11 +13,19 @@
 		"addCredit": "Adicionar crédito",
 		"lowBalance": "Seu saldo do Kilo Code está baixo"
 	},
+	"invalidModel": {
+		"alphaPeriodEnded": "🎉 O período alfa para {{model}} terminou! Mude para um modelo diferente para continuar.",
+		"modelUnavailable": "⚠️ O modelo {{model}} está indisponível. Mude para um modelo diferente para continuar.",
+		"continueWith": "Continuar com {{model}}",
+		"continue": "Continuar"
+	},
 	"pricing": {
 		"costUnknown": "custo desconhecido",
 		"costUnknownDescription": "O Provedor de API não forneceu dados de custo ou a solicitação foi cancelada.",
 		"freeModelsDescription": "Modelos gratuitos podem ter limites de taxa. Use o link abaixo para otimizar seu uso de modelos gratuitos!",
-		"freeModelsLink": "Descubra opções de modelos gratuitos e econômicos"
+		"freeModelsLink": "Descubra opções de modelos gratuitos e econômicos",
+		"openRouterMarkup": "O provedor Kilo Code inclui todos os modelos do OpenRouter, sem markup e com 0% de comissão!",
+		"switchToKiloCode": "Mudar para Kilo Code"
 	},
 	"notifications": {
 		"toolRequest": "Solicitação de ferramenta aguardando aprovação",
@@ -91,7 +99,8 @@
 		"condense": {
 			"wantsToCondense": "Kilo Code quer condensar sua conversa",
 			"condenseConversation": "Condensar Conversa"
-		}
+		},
+		"seeNewChanges": "Ver Novas Alterações"
 	},
 	"newTaskPreview": {
 		"task": "Tarefa"
@@ -186,41 +195,37 @@
 		}
 	},
 	"ghost": {
-		"title": "Assistência em linha",
+		"title": "Autocomplete",
 		"settings": {
-			"autoTrigger": "Gatilho Automático",
-			"enableQuickInlineTaskKeybinding": {
-				"label": "Tarefa Rápida em Linha",
-				"description": "Precisa apenas de uma mudança rápida? Selecione algum código (ou não!) e pressione Cmd+I. Descreva seu objetivo em linguagem simples (\"criar um componente React com essas props\", \"adicionar tratamento de erro a esta função\") e receba múltiplas sugestões prontas para uso diretamente no seu editor. <DocsLink>Ver atalho</DocsLink>"
-			},
-			"enableAutoInlineTaskKeybinding": {
-				"label": "Tarefa Automática em Linha",
-				"description": "Precisa de uma correção rápida, preenchimento ou refatoração? Kilo usará o contexto ao redor para oferecer melhorias imediatas, mantendo seu fluxo de trabalho. <DocsLink>Ver atalho</DocsLink>"
-			},
+			"autoTrigger": "Ativação Automática",
+			"triggers": "Gatilhos",
+			"keybindingDescription": "As funcionalidades do Autocomplete podem ser ativadas por comandos. Você pode configurar os <DocsLink>Atalhos de Teclado aqui</DocsLink>.",
 			"enableAutoTrigger": {
-				"label": "Ativar Gatilho Automático",
-				"description": "Quando ativado, o Kilo Code acionará automaticamente a Assistência em Linha quando você parar de digitar. Isso pode ser útil para correções e sugestões rápidas."
+				"label": "Habilitar Autocomplete",
+				"description": "Quando habilitado, o Kilo Code ativará automaticamente o Autocomplete quando você parar de digitar. Isso pode ser útil para correções rápidas e sugestões."
 			},
 			"autoTriggerDelay": {
-				"label": "Atraso do Gatilho Automático",
-				"description": "O atraso em segundos antes do Kilo Code acionar a Assistência em Linha após você parar de digitar. Um atraso menor significa sugestões mais rápidas, mas pode ser mais intensivo em recursos."
+				"label": "Atraso da Ativação Automática",
+				"description": "O atraso em segundos antes do Kilo Code ativar o Autocomplete depois que você parar de digitar. Um atraso menor significa sugestões mais rápidas, mas pode ser mais intensivo em recursos."
+			},
+			"enableQuickInlineTaskKeybinding": {
+				"label": "Tarefa Rápida",
+				"description": "Precisa apenas de uma mudança rápida? Selecione algum código (ou não!) e pressione Cmd+I. Descreva seu objetivo em português simples (\"criar um componente React com essas props\", \"adicionar tratamento de erro a esta função\"), e obtenha múltiplas sugestões prontas para uso diretamente no seu editor. <DocsLink>Ver atalho</DocsLink>"
 			},
 			"enableSmartInlineTaskKeybinding": {
-				"label": "Tarefa Inteligente em Linha",
-				"description": "Precisa de uma correção rápida, completar ou refatorar? O Kilo usará o contexto ao redor para oferecer melhorias imediatas, mantendo você no fluxo. <DocsLink>Ver atalho</DocsLink>"
+				"label": "Autocomplete Manual",
+				"description": "Precisa de uma correção rápida, completação ou refatoração? O Kilo usará o contexto ao redor para oferecer melhorias imediatas, mantendo você no fluxo. <DocsLink>Ver atalho</DocsLink>"
 			},
 			"enableCustomProvider": {
 				"label": "Usar provedor personalizado",
-				"description": "O Inline Assist usa suas credenciais do KiloCode / OpenRouter / Mistral para usar o modelo Codestral por padrão"
+				"description": "O Autocomplete usa suas credenciais KiloCode / OpenRouter / Mistral para usar o modelo Codestral por padrão"
 			},
 			"provider": "Provedor",
 			"apiConfigId": {
-				"label": "Configuração de API",
-				"current": "Usar configuração de API atualmente selecionada",
-				"description": "Selecione uma configuração de API para usar nos prompts do Inline Assist ou apenas use o que estiver selecionado no momento"
-			},
-			"triggers": "Gatilhos",
-			"keybindingDescription": "Os recursos de Assistência em Linha são acionados por comandos. Você pode configurar os <DocsLink>atalhos de teclado aqui</DocsLink>."
+				"label": "Configuração da API",
+				"current": "Usar configuração da API atualmente selecionada",
+				"description": "Selecione uma configuração da API para usar nos prompts do Autocomplete, ou apenas use a que está atualmente selecionada"
+			}
 		}
 	},
 	"virtualProvider": {
@@ -244,5 +249,10 @@
 		"requestsLabel": "Solicitações",
 		"perMinute": "Por Minuto",
 		"perHour": "Por Hora"
+	},
+	"imageWarnings": {
+		"modelNoImageSupport": "Imagens não são suportadas pelo modelo atual.",
+		"maxImagesReached": "Máximo de 20 imagens por mensagem. Remova algumas imagens para adicionar mais.",
+		"imagesRemovedNoSupport": "Imagens removidas, não suportadas pelo modelo."
 	}
 }

@@ -22,11 +22,12 @@ import { convertToMentionPath } from "@/utils/path-mentions"
 import { DropdownOptionType, Button, StandardTooltip } from "@/components/ui" // kilocode_change
 
 import Thumbnails from "../common/Thumbnails"
-import ModeSelector from "./ModeSelector"
+import { ModeSelector } from "./ModeSelector"
 import KiloModeSelector from "../kilocode/KiloModeSelector"
 import { KiloProfileSelector } from "../kilocode/chat/KiloProfileSelector" // kilocode_change
 import { MAX_IMAGES_PER_MESSAGE } from "./ChatView"
 import ContextMenu from "./ContextMenu"
+import { ImageWarningBanner } from "./ImageWarningBanner" // kilocode_change
 import {
 	VolumeX,
 	Pin,
@@ -72,7 +73,7 @@ interface ChatTextAreaProps {
 	onCancel?: () => void
 }
 
-const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
+export const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 	(
 		{
 			inputValue,
@@ -247,11 +248,12 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		const contextMenuContainerRef = useRef<HTMLDivElement>(null)
 		const [isEnhancingPrompt, setIsEnhancingPrompt] = useState(false)
 		const [isFocused, setIsFocused] = useState(false)
+		const [imageWarning, setImageWarning] = useState<string | null>(null) // kilocode_change
 
 		// Use custom hook for prompt history navigation
 		const { handleHistoryNavigation, resetHistoryNavigation, resetOnInputChange } = usePromptHistory({
 			clineMessages,
-			taskHistory,
+			taskHistory: taskHistory || [],
 			cwd,
 			inputValue,
 			setInputValue,
@@ -278,6 +280,28 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				setInputValue(t("chat:enhancePromptDescription"))
 			}
 		}, [inputValue, setInputValue, t])
+
+		// kilocode_change start: Image warning handlers
+		const showImageWarning = useCallback((messageKey: string) => {
+			setImageWarning(messageKey)
+		}, [])
+
+		const dismissImageWarning = useCallback(() => {
+			setImageWarning(null)
+		}, [])
+		// kilocode_change end: Image warning handlers
+
+		// kilocode_change start: Clear images if unsupported
+		// Track previous shouldDisableImages state to detect when model image support changes
+		const prevShouldDisableImages = useRef<boolean>(shouldDisableImages)
+		useEffect(() => {
+			if (!prevShouldDisableImages.current && shouldDisableImages && selectedImages.length > 0) {
+				setSelectedImages([])
+				showImageWarning("kilocode:imageWarnings.imagesRemovedNoSupport")
+			}
+			prevShouldDisableImages.current = shouldDisableImages
+		}, [shouldDisableImages, selectedImages.length, setSelectedImages, showImageWarning])
+		// kilocode_change end: Clear images if unsupported
 
 		const allModes = useMemo(() => getAllModes(customModes), [customModes])
 
@@ -801,8 +825,19 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					return type === "image" && acceptedTypes.includes(subtype)
 				})
 
-				if (!shouldDisableImages && imageItems.length > 0) {
+				// kilocode_change start: Image validation with warning messages
+				if (imageItems.length > 0) {
 					e.preventDefault()
+
+					if (shouldDisableImages) {
+						showImageWarning(`kilocode:imageWarnings.modelNoImageSupport`)
+						return
+					}
+					if (selectedImages.length >= MAX_IMAGES_PER_MESSAGE) {
+						showImageWarning(`kilocode:imageWarnings.maxImagesReached`)
+						return
+					}
+					// kilocode_change end: Image validation with warning messages
 
 					const imagePromises = imageItems.map((item) => {
 						return new Promise<string | null>((resolve) => {
@@ -839,7 +874,16 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 					}
 				}
 			},
-			[shouldDisableImages, setSelectedImages, cursorPosition, setInputValue, inputValue, t],
+			[
+				shouldDisableImages,
+				setSelectedImages,
+				cursorPosition,
+				setInputValue,
+				inputValue,
+				t,
+				selectedImages.length, // kilocode_change - added selectedImages.length
+				showImageWarning, // kilocode_change - added showImageWarning
+			],
 		)
 
 		const handleMenuMouseDown = useCallback(() => {
@@ -959,7 +1003,18 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 						return type === "image" && acceptedTypes.includes(subtype)
 					})
 
-					if (!shouldDisableImages && imageFiles.length > 0) {
+					// kilocode_change start: Image validation with warning messages for drag and drop
+					if (imageFiles.length > 0) {
+						if (shouldDisableImages) {
+							showImageWarning("kilocode:imageWarnings.modelNoImageSupport")
+							return
+						}
+						if (selectedImages.length >= MAX_IMAGES_PER_MESSAGE) {
+							showImageWarning("kilocode:imageWarnings.maxImagesReached")
+							return
+						}
+						// kilocode_change end: Image validation with warning messages for drag and drop
+
 						const imagePromises = imageFiles.map((file) => {
 							return new Promise<string | null>((resolve) => {
 								const reader = new FileReader()
@@ -1005,6 +1060,8 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				shouldDisableImages,
 				setSelectedImages,
 				t,
+				selectedImages.length, // kilocode_change - added selectedImages.length
+				showImageWarning, // kilocode_change - added showImageWarning
 			],
 		)
 
@@ -1523,6 +1580,13 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 								setIsDraggingOver(false)
 							}
 						}}>
+						{/* kilocode_change start: ImageWarningBanner integration */}
+						<ImageWarningBanner
+							messageKey={imageWarning ?? ""}
+							onDismiss={dismissImageWarning}
+							isVisible={!!imageWarning}
+						/>
+						{/* kilocode_change end: ImageWarningBanner integration */}
 						{/* kilocode_change start: pull slash commands from Cline */}
 						{showSlashCommandsMenu && (
 							<div ref={slashCommandsMenuContainerRef}>
@@ -1536,7 +1600,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 								/>
 							</div>
 						)}
-						{/* kilocode_change end */}
+						{/* kilocode_change end: pull slash commands from Cline */}
 						{showContextMenu && (
 							<div
 								ref={contextMenuContainerRef}
@@ -1605,5 +1669,3 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 		)
 	},
 )
-
-export default ChatTextArea

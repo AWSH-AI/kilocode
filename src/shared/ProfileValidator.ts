@@ -1,5 +1,4 @@
-import type { ProviderSettings } from "@roo-code/types"
-import type { OrganizationAllowList } from "@roo-code/cloud"
+import type { ProviderSettings, OrganizationAllowList } from "@roo-code/types"
 
 export class ProfileValidator {
 	public static isProfileAllowed(profile: ProviderSettings, allowList: OrganizationAllowList): boolean {
@@ -92,10 +91,8 @@ export class ProfileValidator {
 				return profile.requestyModelId
 			case "io-intelligence":
 				return profile.ioIntelligenceModelId
-			// kilocode_change start
 			case "deepinfra":
 				return profile.deepInfraModelId
-			// kilocode_change end
 			case "human-relay":
 			case "fake-ai":
 			default:

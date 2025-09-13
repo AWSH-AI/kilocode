@@ -230,7 +230,6 @@ describe("mergeExtensionState", () => {
 			mcpEnabled: false,
 			enableMcpServerCreation: false,
 			clineMessages: [],
-			taskHistory: [],
 			shouldShowAnnouncement: false,
 			enableCheckpoints: true,
 			writeDelayMs: 1000,
@@ -257,6 +256,9 @@ describe("mergeExtensionState", () => {
 			maxImageFileSize: 5,
 			maxTotalImageSize: 20,
 			kilocodeDefaultModel: openRouterDefaultModelId,
+			alwaysAllowFollowupQuestions: true,
+			followupAutoApproveTimeoutMs: 5000,
+			taskHistory: [],
 		}
 
 		const prevState: ExtensionState = {
@@ -271,10 +273,11 @@ describe("mergeExtensionState", () => {
 			experiments: {
 				powerSteering: true,
 				multiFileApplyDiff: true,
-				inlineAssist: false, // kilocode_change
 				preventFocusDisruption: false,
 				morphFastApply: false, // kilocode_change
 				newTaskRequireTodos: false,
+				imageGeneration: false,
+				runSlashCommand: false,
 			} as Record<ExperimentId, boolean>,
 		}
 
@@ -288,10 +291,11 @@ describe("mergeExtensionState", () => {
 		expect(result.experiments).toEqual({
 			powerSteering: true,
 			multiFileApplyDiff: true,
-			inlineAssist: false, // kilocode_change
 			preventFocusDisruption: false,
 			morphFastApply: false, // kilocode_change
 			newTaskRequireTodos: false,
+			imageGeneration: false,
+			runSlashCommand: false,
 		})
 	})
 })

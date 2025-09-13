@@ -29,6 +29,7 @@ import type {
 	ApiHandlerCreateMessageMetadata, // kilocode_change
 	SingleCompletionHandler,
 } from "../index"
+import { verifyFinishReason } from "./kilocode/verifyFinishReason"
 
 // kilocode_change start
 type OpenRouterProviderParams = {
@@ -40,6 +41,34 @@ type OpenRouterProviderParams = {
 	sort?: "price" | "throughput" | "latency"
 }
 // kilocode_change end
+import { handleOpenAIError } from "./utils/openai-error-handler"
+
+// Image generation types
+interface ImageGenerationResponse {
+	choices?: Array<{
+		message?: {
+			content?: string
+			images?: Array<{
+				type?: string
+				image_url?: {
+					url?: string
+				}
+			}>
+		}
+	}>
+	error?: {
+		message?: string
+		type?: string
+		code?: string
+	}
+}
+
+export interface ImageGenerationResult {
+	success: boolean
+	imageData?: string
+	imageFormat?: string
+	error?: string
+}
 
 // Add custom interface for OpenRouter params.
 type OpenRouterChatCompletionParams = OpenAI.Chat.ChatCompletionCreateParams & {
@@ -76,6 +105,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 	private client: OpenAI
 	protected models: ModelRecord = {}
 	protected endpoints: ModelRecord = {}
+	private readonly providerName = "OpenRouter"
 
 	constructor(options: ApiHandlerOptions) {
 		super()
@@ -88,7 +118,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 	}
 
 	// kilocode_change start
-	customRequestOptions(_metadata?: ApiHandlerCreateMessageMetadata): OpenAI.RequestOptions | undefined {
+	customRequestOptions(_metadata?: ApiHandlerCreateMessageMetadata): { headers: Record<string, string> } | undefined {
 		return undefined
 	}
 
@@ -114,6 +144,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 					order: [this.options.openRouterSpecificProvider],
 					only: [this.options.openRouterSpecificProvider],
 					allow_fallbacks: false,
+					data_collection: this.options.openRouterProviderDataCollection,
 				},
 			}
 		}
@@ -192,11 +223,16 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 			...(transforms && { transforms }),
 			...(reasoning && { reasoning }),
 		}
+
 		let stream
-		stream = await this.client.chat.completions.create(
-			completionParams,
-			this.customRequestOptions(metadata), // kilocode_change
-		)
+		try {
+			stream = await this.client.chat.completions.create(
+				completionParams,
+				this.customRequestOptions(metadata), // kilocode_change
+			)
+		} catch (error) {
+			throw handleOpenAIError(error, this.providerName)
+		}
 
 		let lastUsage: CompletionUsage | undefined = undefined
 
@@ -209,6 +245,7 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 					throw new Error(`OpenRouter API Error ${error?.code}: ${error?.message}`)
 				}
 
+				verifyFinishReason(chunk.choices[0]) // kilocode_change
 				const delta = chunk.choices[0]?.delta
 
 				if (
@@ -308,7 +345,12 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 			...(reasoning && { reasoning }),
 		}
 
-		const response = await this.client.chat.completions.create(completionParams)
+		let response
+		try {
+			response = await this.client.chat.completions.create(completionParams)
+		} catch (error) {
+			throw handleOpenAIError(error, this.providerName)
+		}
 
 		if ("error" in response) {
 			const error = response.error as { message?: string; code?: number }
@@ -317,6 +359,134 @@ export class OpenRouterHandler extends BaseProvider implements SingleCompletionH
 
 		const completion = response as OpenAI.Chat.ChatCompletion
 		return completion.choices[0]?.message?.content || ""
+	}
+
+	/**
+	 * Generate an image using OpenRouter's image generation API
+	 * @param prompt The text prompt for image generation
+	 * @param model The model to use for generation
+	 * @param apiKey The OpenRouter API key (must be explicitly provided)
+	 * @param inputImage Optional base64 encoded input image data URL
+	 * @returns The generated image data and format, or an error
+	 */
+	async generateImage(
+		prompt: string,
+		model: string,
+		apiKey: string,
+		inputImage?: string,
+		taskId?: string, // kilocode_change
+	): Promise<ImageGenerationResult> {
+		if (!apiKey) {
+			return {
+				success: false,
+				error: "OpenRouter API key is required for image generation",
+			}
+		}
+
+		const extraHeaders = (taskId ? this.customRequestOptions({ taskId })?.headers : undefined) ?? {} // kilocode_change
+
+		try {
+			const response = await fetch(
+				`${this.options.openRouterBaseUrl || "https://openrouter.ai/api/v1/"}chat/completions`, // kilocode_change: support baseUrl
+				{
+					method: "POST",
+					headers: {
+						// kilocode_change start
+						...DEFAULT_HEADERS,
+						...extraHeaders,
+						// kilocode_change end
+						Authorization: `Bearer ${apiKey}`,
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						model,
+						messages: [
+							{
+								role: "user",
+								content: inputImage
+									? [
+											{
+												type: "text",
+												text: prompt,
+											},
+											{
+												type: "image_url",
+												image_url: {
+													url: inputImage,
+												},
+											},
+										]
+									: prompt,
+							},
+						],
+						modalities: ["image", "text"],
+					}),
+				},
+			)
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				let errorMessage = `Failed to generate image: ${response.status} ${response.statusText}`
+				try {
+					const errorJson = JSON.parse(errorText)
+					if (errorJson.error?.message) {
+						errorMessage = `Failed to generate image: ${errorJson.error.message}`
+					}
+				} catch {
+					// Use default error message
+				}
+				return {
+					success: false,
+					error: errorMessage,
+				}
+			}
+
+			const result: ImageGenerationResponse = await response.json()
+
+			if (result.error) {
+				return {
+					success: false,
+					error: `Failed to generate image: ${result.error.message}`,
+				}
+			}
+
+			// Extract the generated image from the response
+			const images = result.choices?.[0]?.message?.images
+			if (!images || images.length === 0) {
+				return {
+					success: false,
+					error: "No image was generated in the response",
+				}
+			}
+
+			const imageData = images[0]?.image_url?.url
+			if (!imageData) {
+				return {
+					success: false,
+					error: "Invalid image data in response",
+				}
+			}
+
+			// Extract base64 data from data URL
+			const base64Match = imageData.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/)
+			if (!base64Match) {
+				return {
+					success: false,
+					error: "Invalid image format received",
+				}
+			}
+
+			return {
+				success: true,
+				imageData: imageData,
+				imageFormat: base64Match[1],
+			}
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : "Unknown error occurred",
+			}
+		}
 	}
 }
 

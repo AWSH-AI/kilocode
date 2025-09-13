@@ -9,9 +9,10 @@ import {
 	GhostServiceSettings, // kilocode_change
 	openRouterDefaultModelId, // kilocode_change
 	type TodoItem,
+	type TelemetrySetting,
+	type OrganizationAllowList,
+	ORGANIZATION_ALLOW_ALL,
 } from "@roo-code/types"
-
-import { type OrganizationAllowList, ORGANIZATION_ALLOW_ALL } from "@roo/cloud"
 
 import { ExtensionMessage, ExtensionState, MarketplaceInstalledMetadata, Command } from "@roo/ExtensionMessage"
 import { findLastIndex } from "@roo/array"
@@ -20,7 +21,6 @@ import { checkExistKey } from "@roo/checkExistApiConfig"
 import { Mode, defaultModeSlug, defaultPrompts } from "@roo/modes"
 import { CustomSupportPrompts } from "@roo/support-prompt"
 import { experimentDefault } from "@roo/experiments"
-import { TelemetrySetting } from "@roo/TelemetrySetting"
 import { RouterModels } from "@roo/api"
 import { McpMarketplaceCatalog } from "../../../src/shared/kilocode/mcp" // kilocode_change
 
@@ -28,7 +28,7 @@ import { vscode } from "@src/utils/vscode"
 import { convertTextMateToHljs } from "@src/utils/textMateToHljs"
 import { ClineRulesToggles } from "@roo/cline-rules" // kilocode_change
 
-export interface ExtensionStateContextType extends ExtensionState {
+export interface ExtensionStateContextType extends Omit<ExtensionState, "marketplaceInstalledMetadata"> {
 	historyPreviewCollapsed?: boolean // Add the new state property
 	showTaskTimeline?: boolean // kilocode_change
 	setShowTaskTimeline: (value: boolean) => void // kilocode_change
@@ -201,10 +201,10 @@ export const mergeExtensionState = (prevState: ExtensionState, newState: Extensi
 }
 
 export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [state, setState] = useState<ExtensionState & { organizationAllowList?: OrganizationAllowList }>({
+	const [state, setState] = useState<ExtensionState>({
+		apiConfiguration: {},
 		version: "",
 		clineMessages: [],
-		taskHistory: [],
 		shouldShowAnnouncement: false,
 		allowedCommands: [],
 		deniedCommands: [],
@@ -286,6 +286,12 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		alwaysAllowUpdateTodoList: true,
 		includeDiagnosticMessages: true,
 		maxDiagnosticMessages: 50,
+		alwaysAllowFollowupQuestions: false,
+		followupAutoApproveTimeoutMs: undefined,
+		openRouterImageApiKey: "",
+		kiloCodeImageApiKey: "",
+		openRouterImageGenerationSelectedModel: "",
+		taskHistory: [],
 	})
 
 	const [didHydrateState, setDidHydrateState] = useState(false)
@@ -354,7 +360,12 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 						setMarketplaceItems(newState.marketplaceItems)
 					}
 					if (newState.marketplaceInstalledMetadata !== undefined) {
-						setMarketplaceInstalledMetadata(newState.marketplaceInstalledMetadata)
+						// Convert between the two types
+						const metadata = newState.marketplaceInstalledMetadata as any
+						setMarketplaceInstalledMetadata({
+							project: metadata.project || {},
+							global: metadata.global || {},
+						})
 					}
 					break
 				}
@@ -426,7 +437,10 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 						setMarketplaceItems(message.marketplaceItems)
 					}
 					if (message.marketplaceInstalledMetadata !== undefined) {
-						setMarketplaceInstalledMetadata(message.marketplaceInstalledMetadata)
+						setMarketplaceInstalledMetadata({
+							project: (message.marketplaceInstalledMetadata as any).project || {},
+							global: (message.marketplaceInstalledMetadata as any).global || {},
+						})
 					}
 					break
 				}
@@ -476,6 +490,7 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		profileThresholds: state.profileThresholds ?? {},
 		alwaysAllowFollowupQuestions,
 		followupAutoApproveTimeoutMs,
+		taskHistory: [],
 		remoteControlEnabled: state.remoteControlEnabled ?? false,
 		setExperimentEnabled: (id, enabled) =>
 			setState((prevState) => ({ ...prevState, experiments: { ...prevState.experiments, [id]: enabled } })),

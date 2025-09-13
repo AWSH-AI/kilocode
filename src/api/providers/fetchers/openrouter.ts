@@ -19,7 +19,8 @@ import { DEFAULT_HEADERS } from "../constants" // kilocode_change
  */
 
 const openRouterArchitectureSchema = z.object({
-	modality: z.string().nullish(),
+	input_modalities: z.array(z.string()).nullish(),
+	output_modalities: z.array(z.string()).nullish(),
 	tokenizer: z.string().nullish(),
 })
 
@@ -59,8 +60,9 @@ export type OpenRouterModel = z.infer<typeof openRouterModelSchema>
  */
 
 export const openRouterModelEndpointSchema = modelRouterBaseModelSchema.extend({
+	model_name: z.string(), // kilocode_change
 	provider_name: z.string(),
-	tag: z.string().optional(), // kilocode_change
+	tag: z.string().optional(),
 })
 
 export type OpenRouterModelEndpoint = z.infer<typeof openRouterModelEndpointSchema>
@@ -116,10 +118,17 @@ export async function getOpenRouterModels(
 		for (const model of data) {
 			const { id, architecture, top_provider, supported_parameters = [] } = model
 
+			// Skip image generation models (models that output images)
+			if (architecture?.output_modalities?.includes("image")) {
+				continue
+			}
+
 			models[id] = parseOpenRouterModel({
 				id,
 				model,
-				modality: architecture?.modality,
+				displayName: model.name, // kilocode_change
+				inputModality: architecture?.input_modalities,
+				outputModality: architecture?.output_modalities,
 				maxTokens: top_provider?.max_completion_tokens,
 				supportedParameters: supported_parameters,
 			})
@@ -156,11 +165,18 @@ export async function getOpenRouterModelEndpoints(
 
 		const { id, architecture, endpoints } = data
 
+		// Skip image generation models (models that output images)
+		if (architecture?.output_modalities?.includes("image")) {
+			return models
+		}
+
 		for (const endpoint of endpoints) {
-			models[endpoint.tag /*kilocode_change*/ ?? endpoint.provider_name] = parseOpenRouterModel({
+			models[endpoint.tag ?? endpoint.provider_name] = parseOpenRouterModel({
 				id,
 				model: endpoint,
-				modality: architecture?.modality,
+				displayName: endpoint.model_name, // kilocode_change
+				inputModality: architecture?.input_modalities,
+				outputModality: architecture?.output_modalities,
 				maxTokens: endpoint.max_completion_tokens,
 			})
 		}
@@ -180,13 +196,17 @@ export async function getOpenRouterModelEndpoints(
 export const parseOpenRouterModel = ({
 	id,
 	model,
-	modality,
+	displayName, // kilocode_change
+	inputModality,
+	outputModality,
 	maxTokens,
 	supportedParameters,
 }: {
 	id: string
 	model: OpenRouterBaseModel
-	modality: string | null | undefined
+	displayName?: string // kilocode_change
+	inputModality: string[] | null | undefined
+	outputModality: string[] | null | undefined
 	maxTokens: number | null | undefined
 	supportedParameters?: string[]
 }): ModelInfo => {
@@ -196,12 +216,12 @@ export const parseOpenRouterModel = ({
 
 	const cacheReadsPrice = model.pricing?.input_cache_read ? parseApiPrice(model.pricing?.input_cache_read) : undefined
 
-	const supportsPromptCache = typeof cacheReadsPrice !== "undefined" // kilocode_change: some caching models don't list a cacheWritesPrice
+	const supportsPromptCache = typeof cacheReadsPrice !== "undefined" // some models support caching but don't charge a cacheWritesPrice, e.g. GPT-5
 
 	const modelInfo: ModelInfo = {
 		maxTokens: maxTokens || Math.ceil(model.context_length * 0.2),
 		contextWindow: model.context_length,
-		supportsImages: modality?.includes("image") ?? false,
+		supportsImages: inputModality?.includes("image") ?? false,
 		supportsPromptCache,
 		inputPrice: parseApiPrice(model.pricing?.prompt),
 		outputPrice: parseApiPrice(model.pricing?.completion),
@@ -210,7 +230,10 @@ export const parseOpenRouterModel = ({
 		description: model.description,
 		supportsReasoningEffort: supportedParameters ? supportedParameters.includes("reasoning") : undefined,
 		supportedParameters: supportedParameters ? supportedParameters.filter(isModelParameter) : undefined,
-		preferredIndex: model.preferredIndex, // kilocode_change
+		// kilocode_change start
+		displayName,
+		preferredIndex: model.preferredIndex,
+		// kilocode_change end
 	}
 
 	// The OpenRouter model definition doesn't give us any hints about
