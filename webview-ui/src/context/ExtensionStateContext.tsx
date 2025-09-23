@@ -286,6 +286,9 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 		alwaysAllowUpdateTodoList: true,
 		includeDiagnosticMessages: true,
 		maxDiagnosticMessages: 50,
+		commands: [],
+		alwaysAllowFollowupQuestions: false,
+		followupAutoApproveTimeoutMs: undefined,
 	})
 
 	const [didHydrateState, setDidHydrateState] = useState(false)
@@ -354,7 +357,9 @@ export const ExtensionStateContextProvider: React.FC<{ children: React.ReactNode
 						setMarketplaceItems(newState.marketplaceItems)
 					}
 					if (newState.marketplaceInstalledMetadata !== undefined) {
-						setMarketplaceInstalledMetadata(newState.marketplaceInstalledMetadata)
+						setMarketplaceInstalledMetadata(
+							newState.marketplaceInstalledMetadata as MarketplaceInstalledMetadata,
+						)
 					}
 					break
 				}

@@ -570,6 +570,10 @@ describe("ClineProvider", () => {
 			profileThresholds: {},
 			hasOpenedModeSelector: false,
 			diagnosticsEnabled: true,
+			// Add missing properties
+			commands: [],
+			alwaysAllowFollowupQuestions: false,
+			followupAutoApproveTimeoutMs: undefined,
 		}
 
 		const message: ExtensionMessage = {
