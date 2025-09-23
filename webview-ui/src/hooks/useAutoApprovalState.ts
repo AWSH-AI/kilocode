@@ -15,11 +15,13 @@ interface AutoApprovalToggles {
 
 export function useAutoApprovalState(toggles: AutoApprovalToggles, autoApprovalEnabled?: boolean) {
 	const hasEnabledOptions = useMemo(() => {
-		return Object.values(toggles).some((value) => !!value)
+		const hasEnabled = Object.values(toggles).some((value) => !!value)
+		return hasEnabled
 	}, [toggles])
 
 	const effectiveAutoApprovalEnabled = useMemo(() => {
-		return hasEnabledOptions && (autoApprovalEnabled ?? false)
+		const effective = hasEnabledOptions && (autoApprovalEnabled ?? false)
+		return effective
 	}, [hasEnabledOptions, autoApprovalEnabled])
 
 	return {
