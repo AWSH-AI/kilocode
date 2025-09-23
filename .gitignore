@@ -53,4 +53,4 @@ logs
 .direnv
 
 # Exclude Conport Directory (MCP server)
-context_portal/
+context_portal/.agent/private/
