@@ -341,8 +341,8 @@ export type ExtensionState = Pick<
 	kilocodeDefaultModel: string
 	shouldShowAnnouncement: boolean
 
-	// Remove taskHistory from global state - will be loaded on-demand
-	// taskHistory: HistoryItem[] // Loaded on-demand, not stored in global state
+	// Add taskHistory back to fix TypeScript errors
+	taskHistory: HistoryItem[]
 
 	writeDelayMs: number
 	requestDelaySeconds: number
@@ -385,7 +385,7 @@ export type ExtensionState = Pick<
 	autoCondenseContext: boolean
 	autoCondenseContextPercent: number
 	marketplaceItems?: MarketplaceItem[]
-	marketplaceInstalledMetadata?: { project: Record<string, any>; version: string } | undefined
+	marketplaceInstalledMetadata?: MarketplaceInstalledMetadata | undefined
 	commands: Command[]
 	maxConcurrentFileReads?: number
 	allowVeryLargeReads?: boolean // kilocode_change

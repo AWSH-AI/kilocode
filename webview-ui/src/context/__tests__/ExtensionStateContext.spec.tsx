@@ -257,6 +257,9 @@ describe("mergeExtensionState", () => {
 			maxImageFileSize: 5,
 			maxTotalImageSize: 20,
 			kilocodeDefaultModel: openRouterDefaultModelId,
+			commands: [],
+			alwaysAllowFollowupQuestions: false,
+			followupAutoApproveTimeoutMs: undefined,
 		}
 
 		const prevState: ExtensionState = {

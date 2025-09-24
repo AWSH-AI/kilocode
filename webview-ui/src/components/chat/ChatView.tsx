@@ -321,6 +321,18 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 							setSendingDisabled(isPartial)
 							setClineAsk("tool")
 							setEnableButtons(!isPartial)
+
+							// Trigger auto-approval check immediately for tool actions
+							if (isAutoApproved(lastMessage) && !isPartial) {
+								// Set a timeout to ensure the state updates first
+								setTimeout(() => {
+									if (userRespondedRef.current) return
+									vscode.postMessage({ type: "askResponse", askResponse: "yesButtonClicked" })
+									setSendingDisabled(true)
+									setClineAsk(undefined)
+									setEnableButtons(false)
+								}, 0)
+							}
 							const tool = JSON.parse(lastMessage.text || "{}") as ClineSayTool
 							switch (tool.tool) {
 								case "editedExistingFile":
@@ -359,6 +371,18 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 							setEnableButtons(!isPartial)
 							setPrimaryButtonText(t("chat:approve.title"))
 							setSecondaryButtonText(t("chat:reject.title"))
+
+							// Trigger auto-approval check immediately for browser actions
+							if (isAutoApproved(lastMessage) && !isPartial) {
+								// Set a timeout to ensure the state updates first
+								setTimeout(() => {
+									if (userRespondedRef.current) return
+									vscode.postMessage({ type: "askResponse", askResponse: "yesButtonClicked" })
+									setSendingDisabled(true)
+									setClineAsk(undefined)
+									setEnableButtons(false)
+								}, 0)
+							}
 							break
 						case "command":
 							if (!isAutoApproved(lastMessage) && !isPartial) {
@@ -370,6 +394,18 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 							setEnableButtons(!isPartial)
 							setPrimaryButtonText(t("chat:runCommand.title"))
 							setSecondaryButtonText(t("chat:reject.title"))
+
+							// Trigger auto-approval check immediately for commands
+							if (isAutoApproved(lastMessage) && !isPartial) {
+								// Set a timeout to ensure the state updates first
+								setTimeout(() => {
+									if (userRespondedRef.current) return
+									vscode.postMessage({ type: "askResponse", askResponse: "yesButtonClicked" })
+									setSendingDisabled(true)
+									setClineAsk(undefined)
+									setEnableButtons(false)
+								}, 0)
+							}
 							break
 						case "command_output":
 							setSendingDisabled(false)
@@ -387,6 +423,18 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 							setEnableButtons(!isPartial)
 							setPrimaryButtonText(t("chat:approve.title"))
 							setSecondaryButtonText(t("chat:reject.title"))
+
+							// Trigger auto-approval check immediately for MCP server actions
+							if (isAutoApproved(lastMessage) && !isPartial) {
+								// Set a timeout to ensure the state updates first
+								setTimeout(() => {
+									if (userRespondedRef.current) return
+									vscode.postMessage({ type: "askResponse", askResponse: "yesButtonClicked" })
+									setSendingDisabled(true)
+									setClineAsk(undefined)
+									setEnableButtons(false)
+								}, 0)
+							}
 							break
 						case "completion_result":
 							// extension waiting for feedback. but we can just present a new task button
@@ -1809,6 +1857,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 					// kilocode_change end
 				}
 
+				// Send approval response for auto-approved actions
 				vscode.postMessage({ type: "askResponse", askResponse: "yesButtonClicked" })
 
 				setSendingDisabled(true)

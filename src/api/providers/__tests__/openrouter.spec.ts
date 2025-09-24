@@ -61,8 +61,8 @@ describe("OpenRouterHandler", () => {
 			baseURL: "https://openrouter.ai/api/v1",
 			apiKey: mockOptions.openRouterApiKey,
 			defaultHeaders: {
-				"HTTP-Referer": "https://kilocode.ai",
-				"X-Title": "Kilo Code",
+				"HTTP-Referer": "https://awsh.net/code",
+				"X-Title": "AWSH CODE",
 				"X-KiloCode-Version": Package.version,
 				"User-Agent": `Kilo-Code/${Package.version}`,
 			},

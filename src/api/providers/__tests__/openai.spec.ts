@@ -111,8 +111,8 @@ describe("OpenAiHandler", () => {
 				baseURL: expect.any(String),
 				apiKey: expect.any(String),
 				defaultHeaders: {
-					"HTTP-Referer": "https://kilocode.ai",
-					"X-Title": "Kilo Code",
+					"HTTP-Referer": "https://awsh.net/code",
+					"X-Title": "AWSH CODE",
 					"X-KiloCode-Version": Package.version,
 					"User-Agent": `Kilo-Code/${Package.version}`,
 				},

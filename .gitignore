@@ -54,3 +54,4 @@ logs
 
 # Exclude Conport Directory (MCP server)
 context_portal/
+.agent/private/
