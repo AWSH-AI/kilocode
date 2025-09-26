@@ -9,9 +9,10 @@ interface QueuedMessagesProps {
 	queue: QueuedMessage[]
 	onRemove: (index: number) => void
 	onUpdate: (index: number, newText: string) => void
+	onForceSend: (index: number) => void
 }
 
-const QueuedMessages: React.FC<QueuedMessagesProps> = ({ queue, onRemove, onUpdate }) => {
+const QueuedMessages: React.FC<QueuedMessagesProps> = ({ queue, onRemove, onUpdate, onForceSend }) => {
 	const { t } = useTranslation("chat")
 	const [editingStates, setEditingStates] = useState<Record<string, { isEditing: boolean; value: string }>>({})
 
@@ -86,6 +87,17 @@ const QueuedMessages: React.FC<QueuedMessagesProps> = ({ queue, onRemove, onUpda
 									)}
 								</div>
 								<div className="flex">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="shrink-0 mr-2"
+										onClick={(e) => {
+											e.stopPropagation()
+											onForceSend(index)
+										}}
+										title={t("chat:forceSend.title")}>
+										<span className="codicon codicon-send" />
+									</Button>
 									<Button
 										variant="ghost"
 										size="icon"
