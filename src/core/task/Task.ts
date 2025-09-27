@@ -279,6 +279,11 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	presentAssistantMessageHasPendingUpdates = false
 	userMessageContent: (Anthropic.TextBlockParam | Anthropic.ImageBlockParam)[] = []
 	userMessageContentReady = false
+	// Force-send control: request that only the current streaming API call stop,
+	// without aborting the entire Task instance. The handler will set these
+	// flags and the streaming loop will handle them gracefully.
+	stopStreamingRequested = false
+	stopStreamingRequestedMessage?: { text?: string; images?: string[] }
 	didRejectTool = false
 	didAlreadyUseTool = false
 	didCompleteReadingStream = false
@@ -851,11 +856,31 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 	public setMessageResponse(text: string, images?: string[]) {
 		this.handleWebviewAskResponse("messageResponse", text, images)
 	}
-
+	
 	handleWebviewAskResponse(askResponse: ClineAskResponse, text?: string, images?: string[]) {
 		this.askResponse = askResponse
 		this.askResponseText = text
 		this.askResponseImages = images
+	}
+	
+	public requestStopStreaming(text?: string, images?: string[]): void {
+		// Mark that a stop-streaming request has been made and store the
+		// optional forced message. The streaming loop will observe this flag
+		// and act accordingly.
+		this.stopStreamingRequested = true
+		this.stopStreamingRequestedMessage = text || images ? { text, images } : undefined
+
+		// Verbose debug log to help trace force-send behaviour at runtime.
+		// Include a short preview so logs are useful without being overly noisy.
+		try {
+			const preview = (text ?? "").slice(0, 80).replace(/\n/g, " ")
+			console.log(
+				`[Task#${this.taskId}] requestStopStreaming called -> stopStreamingRequested=${this.stopStreamingRequested}, preview="${preview}", images=${images?.length ?? 0}`,
+			)
+		} catch (err) {
+			// Non-fatal logging error
+			console.error(`[Task#${this.taskId}] requestStopStreaming log failed:`, err)
+		}
 	}
 
 	public approveAsk({ text, images }: { text?: string; images?: string[] } = {}) {
@@ -1854,9 +1879,72 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 							}
 						}
 
+						if (this.stopStreamingRequested) {
+							// A force-send requested to stop the current streaming API
+							// call without aborting the entire Task instance.
+							console.log(
+								`[Task#${this.taskId}] stop-stream requested -> abandoned=${this.abandoned}, isStreaming=${this.isStreaming}`,
+							)
+	
+							// Attempt graceful abort of streaming work (revert diffs, mark messages).
+							if (!this.abandoned) {
+								console.log(`[Task#${this.taskId}] calling abortStream(user_cancelled)`)
+								await abortStream("user_cancelled")
+								console.log(`[Task#${this.taskId}] abortStream returned`)
+							}
+	
+							// Try to close the underlying iterator so no further chunks are processed.
+							try {
+								if (iterator && typeof iterator.return === "function") {
+									console.log(`[Task#${this.taskId}] attempting iterator.return() to close stream`)
+									await iterator.return(undefined)
+									console.log(`[Task#${this.taskId}] iterator.return() completed`)
+								} else {
+									console.log(`[Task#${this.taskId}] iterator.return not available`)
+								}
+							} catch (err) {
+								console.error(`[Task#${this.taskId}] iterator.return() failed:`, err)
+							}
+	
+							// Capture the requested forced message and clear the flag.
+							const forced = this.stopStreamingRequestedMessage
+							this.stopStreamingRequested = false
+							this.stopStreamingRequestedMessage = undefined
+							console.log(
+								`[Task#${this.taskId}] stop-stream: forced message present=${!!forced}, textPreview="${(forced?.text ?? "").slice(
+									0,
+									80,
+								)}", images=${forced?.images?.length ?? 0}`,
+							)
+	
+							if (forced && (forced.text || (forced.images && forced.images.length > 0))) {
+								// Persist the forced message as user feedback so it appears in history immediately.
+								console.log(`[Task#${this.taskId}] persisting forced message as user_feedback`)
+								await this.say("user_feedback", forced.text, forced.images)
+								console.log(`[Task#${this.taskId}] persisted forced message`)
+	
+								// Inject the forced message into the work queue so it will be processed next.
+								const imageBlocks = formatResponse.imageBlocks(forced.images)
+								stack.push({
+									userContent: [
+										{
+											type: "text" as const,
+											text: `\n\nNew instructions for task continuation:\n<user_message>\n${forced.text ?? ""}\n</user_message>`,
+										},
+										...imageBlocks,
+									],
+									includeFileDetails: false,
+								})
+								console.log(`[Task#${this.taskId}] injected forced message into stack (stack length=${stack.length})`)
+							}
+	
+							// Continue processing loop to pick up the injected message
+							continue
+						}
+	
 						if (this.abort) {
 							console.log(`aborting stream, this.abandoned = ${this.abandoned}`)
-
+	
 							if (!this.abandoned) {
 								// Only need to gracefully abort if this instance
 								// isn't abandoned (sometimes OpenRouter stream
@@ -1864,7 +1952,7 @@ export class Task extends EventEmitter<TaskEvents> implements TaskLike {
 								// instances of Cline).
 								await abortStream("user_cancelled")
 							}
-
+	
 							break // Aborts the stream.
 						}
 

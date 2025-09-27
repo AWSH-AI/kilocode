@@ -801,6 +801,44 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 		}
 	}, [sendingDisabled, messageQueue, handleSendMessage, clineAsk])
 
+	/**
+	 * Force-send a specific queued message immediately.
+	 *
+	 * Behavior:
+	 * - Remove only the targeted message from the queue
+	 * - Attempt to send it immediately using handleSendMessage with fromQueue=true
+	 *   (this bypasses the normal "sendingDisabled" check so it's a true force-send)
+	 * - If sending fails, do not re-add the message to the queue (per spec). Log and notify.
+	 */
+	const handleForceSend = useCallback(
+		(index: number) => {
+			const msg = messageQueue[index]
+			if (!msg) return
+
+			// Attempt to send first, then remove the message from the queue on success.
+			// Use Promise.resolve to catch sync or async failures from handleSendMessage.
+			Promise.resolve()
+				.then(() => {
+					// Call the existing send flow with fromQueue=true so it bypasses sendingDisabled.
+					// This preserves the same behavior as queued processing.
+					return handleSendMessage(msg.text, msg.images, true)
+				})
+				.then(() => {
+					// Remove only the targeted message after a successful send
+					setMessageQueue((prev: QueuedMessage[]) => prev.filter((_, i) => i !== index))
+				})
+				.catch((error) => {
+					console.error("Failed to force send queued message:", error)
+					try {
+						showSystemNotification(t("chat:forceSend.failed"))
+					} catch (_e) {
+						// best-effort only
+					}
+				})
+		},
+		[messageQueue, handleSendMessage, t],
+	)
+
 	const handleSetChatBoxMessage = useCallback(
 		(text: string, images: string[]) => {
 			// Avoid nested template literals by breaking down the logic
@@ -2243,6 +2281,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 				onUpdate={(index, newText) => {
 					setMessageQueue((prev) => prev.map((msg, i) => (i === index ? { ...msg, text: newText } : msg)))
 				}}
+				onForceSend={(index) => handleForceSend(index)}
 			/>
 			<ChatTextArea
 				ref={textAreaRef}

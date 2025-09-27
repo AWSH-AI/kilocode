@@ -386,5 +386,10 @@
 	"queuedMessages": {
 		"title": "Queued Messages:",
 		"clickToEdit": "Click to edit message"
+	},
+	"forceSend": {
+		"title": "Send Now",
+		"tooltip": "Force send this queued message immediately",
+		"failed": "Failed to send queued message"
 	}
 }
