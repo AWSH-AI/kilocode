@@ -4,7 +4,6 @@ import Thumbnails from "../common/Thumbnails"
 import { QueuedMessage } from "@roo-code/types"
 import { Mention } from "./Mention"
 import { Button } from "@src/components/ui"
-import { IconButton } from "@src/components/common/IconButton"
 
 interface QueuedMessagesProps {
 	queue: QueuedMessage[]

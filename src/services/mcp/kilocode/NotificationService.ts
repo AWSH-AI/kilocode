@@ -1,9 +1,8 @@
-import { z } from "zod"
 import { Client } from "@modelcontextprotocol/sdk/client/index.js"
 import { LoggingMessageNotificationSchema } from "@modelcontextprotocol/sdk/types.js"
 import * as vscode from "vscode"
 
-export type LogLevel = z.infer<typeof LoggingMessageNotificationSchema>["params"]["level"]
+export type LogLevel = "critical" | "emergency" | "error" | "alert" | "warning" | "notice" | "info" | "debug"
 
 export class NotificationService {
 	connect(name: string, client: Client): void {

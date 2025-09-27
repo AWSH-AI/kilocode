@@ -814,7 +814,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 		(index: number) => {
 			const msg = messageQueue[index]
 			if (!msg) return
-	
+
 			// Attempt to send first, then remove the message from the queue on success.
 			// Use Promise.resolve to catch sync or async failures from handleSendMessage.
 			Promise.resolve()
@@ -831,7 +831,7 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 					console.error("Failed to force send queued message:", error)
 					try {
 						showSystemNotification(t("chat:forceSend.failed"))
-					} catch (e) {
+					} catch (_e) {
 						// best-effort only
 					}
 				})
