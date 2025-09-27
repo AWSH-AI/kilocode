@@ -630,13 +630,87 @@ describe("webviewMessageHandler - mcpEnabled", () => {
 
 	it("handles missing McpHub instance gracefully and still posts state", async () => {
 		;(mockClineProvider as any).getMcpHub = vi.fn().mockReturnValue(undefined)
-
+	
 		await webviewMessageHandler(mockClineProvider, {
 			type: "mcpEnabled",
 			bool: true,
 		})
-
+	
 		expect((mockClineProvider as any).getMcpHub).toHaveBeenCalledTimes(1)
 		expect(mockClineProvider.postStateToWebview).toHaveBeenCalledTimes(1)
+	})
+})
+	
+describe("webviewMessageHandler - askResponse handling", () => {
+	beforeEach(() => {
+		vi.clearAllMocks()
+	})
+	
+	it("cancels current in-progress work and forwards force-send to the resumed task (messageResponse)", async () => {
+		const currentTask: any = {
+			taskId: "test-task-id",
+			apiConversationHistory: [],
+			clineMessages: [{ type: "say", say: "text", text: "previous" }],
+			say: vi.fn().mockResolvedValue(undefined),
+			handleWebviewAskResponse: vi.fn(),
+		}
+
+		const resumedTask: any = {
+			taskId: "resumed-task-id",
+			handleWebviewAskResponse: vi.fn(),
+			isInitialized: true,
+		}
+
+		// Initial current task
+		vi.mocked(mockClineProvider.getCurrentTask).mockReturnValue(currentTask)
+
+		// Mock cancelTask to simulate aborting current task and making a new current task available
+		;(mockClineProvider as any).cancelTask = vi.fn().mockImplementation(async () => {
+			vi.mocked(mockClineProvider.getCurrentTask).mockReturnValue(resumedTask)
+			return Promise.resolve()
+		})
+
+		vi.mocked(mockClineProvider.postMessageToWebview).mockResolvedValue(undefined)
+
+		await webviewMessageHandler(mockClineProvider, {
+			type: "askResponse",
+			askResponse: "messageResponse",
+			text: "Force send text",
+			images: ["data:image/png;base64,force"],
+		})
+
+		expect((mockClineProvider as any).cancelTask).toHaveBeenCalled()
+		expect(resumedTask.handleWebviewAskResponse).toHaveBeenCalledWith(
+			"messageResponse",
+			"Force send text",
+			["data:image/png;base64,force"],
+		)
+		expect(mockClineProvider.postMessageToWebview).toHaveBeenCalledWith({ type: "invoke", invoke: "newChat" })
+
+		// Ensure we did not call the old task's say or ask handlers
+		expect(currentTask.say).not.toHaveBeenCalled()
+		expect(currentTask.handleWebviewAskResponse).not.toHaveBeenCalled()
+	})
+	
+	it("forwards askResponse to handleWebviewAskResponse when the last message is an ask", async () => {
+		const currentTask: any = {
+			taskId: "test-task-id",
+			apiConversationHistory: [],
+			clineMessages: [{ type: "ask", ask: "completion_result", text: "" }],
+			say: vi.fn().mockResolvedValue(undefined),
+			handleWebviewAskResponse: vi.fn(),
+		}
+	
+		vi.mocked(mockClineProvider.getCurrentTask).mockReturnValue(currentTask)
+	
+		await webviewMessageHandler(mockClineProvider, {
+			type: "askResponse",
+			askResponse: "messageResponse",
+			text: "Should be forwarded",
+			images: [],
+		})
+	
+		expect(currentTask.handleWebviewAskResponse).toHaveBeenCalledWith("messageResponse", "Should be forwarded", [])
+		expect(currentTask.say).not.toHaveBeenCalled()
 	})
 })

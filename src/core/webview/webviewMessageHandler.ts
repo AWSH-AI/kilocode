@@ -383,9 +383,117 @@ export const webviewMessageHandler = async (
 			await updateGlobalState("alwaysAllowUpdateTodoList", message.bool)
 			await provider.postStateToWebview()
 			break
-		case "askResponse":
-			provider.getCurrentTask()?.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
+		case "askResponse": {
+			// If the webview sent a "messageResponse" but there is no pending ask
+			// on the current Task (i.e., the last cline message is not an "ask"),
+			// treat it as a normal user message and add it to the conversation so
+			// it appears in chat history immediately. Otherwise, forward to the
+			// Task's regular ask-response handler.
+			const currentTask = provider.getCurrentTask()
+			if (!currentTask) {
+				break
+			}
+
+			if (message.askResponse === "messageResponse") {
+				const lastMsg = currentTask.clineMessages?.[currentTask.clineMessages.length - 1]
+				if (!lastMsg || lastMsg.type !== "ask") {
+					// Force-send behavior: cancel the current in-progress API request
+					// and forward the forced message to the new current task instance
+					// so it can be processed immediately without creating an unrelated new task.
+					try {
+						// Preferred behavior: request the current Task to stop only its
+						// active streaming request and inject the forced message so it
+						// will be processed next without destroying the Task instance.
+						const runningTask = provider.getCurrentTask()
+						if (runningTask && typeof runningTask.requestStopStreaming === "function") {
+							try {
+								console.log(
+									`[webviewMessageHandler] force-send -> invoking requestStopStreaming on task ${runningTask.taskId} (preview="${(
+										message.text ?? ""
+									)
+										.replace(/\n/g, " ")
+										.slice(0, 80)}", images=${message.images?.length ?? 0})`,
+								)
+							} catch (err) {
+								// Non-fatal logging issue
+								console.error("[webviewMessageHandler] failed to log force-send preview:", err)
+							}
+	
+							// Ask the running task to stop its current API stream and accept a forced message.
+							runningTask.requestStopStreaming(message.text, message.images)
+	
+							// Also call provider.cancelTask() when available to support older/provider-specific
+							// flows and tests that expect the current task to be cancelled and a resumed task
+							// to become current. This preserves backward compatibility while the Task-level
+							// stop-streaming API is being rolled out.
+							if (typeof (provider as any).cancelTask === "function") {
+								try {
+									console.log("[webviewMessageHandler] force-send -> also invoking provider.cancelTask() for compatibility")
+									await (provider as any).cancelTask()
+									console.log("[webviewMessageHandler] provider.cancelTask() completed")
+								} catch (err) {
+									console.error("[webviewMessageHandler] provider.cancelTask() call failed:", err)
+								}
+							}
+	
+							// Reset UI to chat view to reflect the interruption
+							await provider.postMessageToWebview({ type: "invoke", invoke: "newChat" })
+	
+							// If cancelTask replaced the current task, forward the forced message to the resumed task.
+							const maybeResumed = provider.getCurrentTask()
+							if (maybeResumed && typeof maybeResumed.handleWebviewAskResponse === "function") {
+								try {
+									maybeResumed.handleWebviewAskResponse("messageResponse", message.text, message.images)
+								} catch (err) {
+									console.error("[webviewMessageHandler] forwarding forced message to resumed task failed:", err)
+								}
+							}
+						} else if (typeof (provider as any).cancelTask === "function") {
+							// Fallback for providers that don't yet implement requestStopStreaming.
+							try {
+								console.log("[webviewMessageHandler] force-send -> falling back to provider.cancelTask()")
+								await (provider as any).cancelTask()
+	
+								// After cancelling, current task may have been replaced.
+								const resumed = provider.getCurrentTask()
+								if (resumed && typeof resumed.handleWebviewAskResponse === "function") {
+									resumed.handleWebviewAskResponse("messageResponse", message.text, message.images)
+								} else {
+									// As a last resort, persist the message so it appears in history.
+									await currentTask.say("user_feedback", message.text, message.images)
+								}
+	
+								// Reset UI to chat view to reflect the interruption
+								await provider.postMessageToWebview({ type: "invoke", invoke: "newChat" })
+							} catch (err) {
+								console.error("[webviewMessageHandler] cancelTask fallback failed:", err)
+								try {
+									await currentTask.say("user_feedback", message.text, message.images)
+								} catch (error) {
+									console.error("Failed fallback persist of force-sent message:", error)
+								}
+							}
+						} else {
+							// If no running task or API not available, fallback to persisting
+							// the message on the currentTask so it appears in history.
+							await currentTask.say("user_feedback", message.text, message.images)
+						}
+					} catch (err) {
+						console.error("[webviewMessageHandler] requestStopStreaming failed:", err)
+						try {
+							await currentTask.say("user_feedback", message.text, message.images)
+						} catch (error) {
+							console.error("Failed fallback persist of force-sent message:", error)
+						}
+					}
+
+					break
+				}
+			}
+
+			currentTask.handleWebviewAskResponse(message.askResponse!, message.text, message.images)
 			break
+		}
 		case "autoCondenseContext":
 			await updateGlobalState("autoCondenseContext", message.bool)
 			await provider.postStateToWebview()

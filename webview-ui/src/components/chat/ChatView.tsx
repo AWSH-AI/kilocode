@@ -814,20 +814,22 @@ const ChatViewComponent: React.ForwardRefRenderFunction<ChatViewRef, ChatViewPro
 		(index: number) => {
 			const msg = messageQueue[index]
 			if (!msg) return
-
-			// Remove only the targeted message
-			setMessageQueue((prev: QueuedMessage[]) => prev.filter((_, i) => i !== index))
-
-			// Attempt to send immediately. Use Promise.resolve to keep parity with queue processing.
+	
+			// Attempt to send first, then remove the message from the queue on success.
+			// Use Promise.resolve to catch sync or async failures from handleSendMessage.
 			Promise.resolve()
 				.then(() => {
-					// Use fromQueue=true to bypass sendingDisabled queueing behavior
+					// Call the existing send flow with fromQueue=true so it bypasses sendingDisabled.
+					// This preserves the same behavior as queued processing.
 					return handleSendMessage(msg.text, msg.images, true)
+				})
+				.then(() => {
+					// Remove only the targeted message after a successful send
+					setMessageQueue((prev: QueuedMessage[]) => prev.filter((_, i) => i !== index))
 				})
 				.catch((error) => {
 					console.error("Failed to force send queued message:", error)
 					try {
-						// Notify user via system notification helper if available
 						showSystemNotification(t("chat:forceSend.failed"))
 					} catch (e) {
 						// best-effort only
